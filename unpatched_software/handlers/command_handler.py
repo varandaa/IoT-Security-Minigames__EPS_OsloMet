@@ -35,7 +35,7 @@ def execute_command(state, cmd):
     elif cmd[:2] == "./":
         run_exploit(state, cmd[2:])
     elif cmd == "clear":
-        state.output_lines = ["Welcome to the terminal.", "Type 'help' for commands."]
+        state.output_lines = ["Welcome to Clippy's terminal.", "Type 'help' for commands."]
     elif cmd == "":
         pass
     else:
@@ -97,9 +97,9 @@ def run_exploit(state, exploit):
                 state.output_lines.append("[+]Sending payload...")
                 wait(state, 3)
                 state.output_lines.append("[!]The RouteSimple router login has been bypassed!")
-                state.failed_login = False
                 state.bypassed = True
-                #missing arduino functionality
+                wait(state, 1)
+                state.bypass_time = pygame.time.get_ticks()
             else:
                 state.output_lines.append("[-]This version of RouteSimple isn't vulnerable to this exploit. Maybe try a different one?")
         else:

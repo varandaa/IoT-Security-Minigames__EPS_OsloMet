@@ -1,43 +1,36 @@
 import pygame
 from config import (BROWSER_BG, TOPBAR_BG, TEXT_COLOR, FIELD_BG, 
-                   FIELD_BORDER, BUTTON_BG, BUTTON_TEXT, BYPASS_ALERT_BG, FAILED_ALERT_BG)
+                   FIELD_BORDER, BUTTON_BG, BUTTON_TEXT, BYPASS_ALERT_BG,
+                    FAILED_ALERT_BG, connected_devices, network_info)
 
 def draw_browser(state):
     """Draw the browser pane (right side)"""
     # Background
     pygame.draw.rect(state.screen, BROWSER_BG, state.browser_rect)
     
-    # Top bar
-    draw_topbar(state)
     
-    # Page header
-    draw_header(state)
-    
-    # Logo
-    draw_logo(state)
-    
-    # Login box
-    draw_login_box(state)
-    
-    # Fields
-    draw_fields(state)
-    
-    # Version label
-    draw_version(state)
-    
-    # Bypass alert
-    if state.bypassed:
-        draw_bypass_alert(state)
+    if state.show_admin_panel:
+        draw_topbar(state, "http://192.168.1.1/admin")
+        # Show admin panel instead of login
+        draw_admin_panel(state)
+    else:
+        # Show login screen
+        draw_topbar(state, "http://192.168.1.1/login")
+        draw_header(state)
+        draw_logo(state)
+        draw_login_box(state)
+        draw_fields(state)
+        draw_version(state)
 
-    # Bypass alert
-    if state.failed_login:
-        draw_failed_login_alert(state)
+        # print(state.login_failed)        
+        # Bypass alert
+        if state.bypassed or state.login_failed:
+            draw_alert(state, state.bypassed)
+        
+        # Cursor in focused field
+        draw_field_cursor(state)
 
-    
-    # Cursor in focused field
-    draw_field_cursor(state)
-
-def draw_topbar(state):
+def draw_topbar(state, url):
     """Draw browser address bar"""
     topbar_rect = pygame.Rect(state.browser_rect.x + 6, state.browser_rect.y + 8, 
                               state.browser_rect.width - 12, max(40, int(state.HEIGHT * 0.04)))
@@ -49,9 +42,8 @@ def draw_topbar(state):
     pygame.draw.circle(state.screen, (39, 201, 63), (topbar_rect.x + 66, topbar_rect.y + topbar_rect.height // 2), 8)
     
     # Address
-    addr = "http://192.168.1.1/login"
-    addr_render = state.ui_font.render(addr, True, TEXT_COLOR)
-    state.screen.blit(addr_render, (topbar_rect.x + 92, topbar_rect.y + (topbar_rect.height - addr_render.get_height()) // 2))
+    url_render = state.ui_font.render(url, True, TEXT_COLOR)
+    state.screen.blit(url_render, (topbar_rect.x + 92, topbar_rect.y + (topbar_rect.height - url_render.get_height()) // 2))
 
 def draw_header(state):
     """Draw page title and divider"""
@@ -132,24 +124,22 @@ def draw_version(state):
     version_x = state.login_box_x + (state.login_box_w - version_label.get_width()) // 2
     state.screen.blit(version_label, (version_x, version_y))
 
-def draw_bypass_alert(state):
+def draw_alert(state, bypassed):
     """Draw bypass success alert"""
-    alert_w = min(220, state.login_box_w - 20)
+    bg_color = FAILED_ALERT_BG
+    alert_min_w = 170
+    alert_string = "INVALID LOGIN"
+    if bypassed:
+        bg_color = BYPASS_ALERT_BG
+        alert_min_w = 150
+        alert_string = "VALID LOGIN"
+ 
+    alert_w = min(alert_min_w, state.login_box_w - 20)
     alert_rect = pygame.Rect(state.login_box_x + state.login_box_w - alert_w - 10, 
                             state.login_box_y - 34, alert_w, 28)
-    pygame.draw.rect(state.screen, BYPASS_ALERT_BG, alert_rect, border_radius=6)
-    alert_txt = state.ui_font.render("LOGIN BYPASSED!", True, (255, 255, 255))
-    state.screen.blit(alert_txt, (alert_rect.x + 12, 
-                                  alert_rect.y + (alert_rect.height - alert_txt.get_height()) // 2))
-
-def draw_failed_login_alert(state):
-    """Draw bypass success alert"""
-    alert_w = min(110, state.login_box_w)
-    alert_rect = pygame.Rect(state.login_box_x + state.login_box_w - alert_w, 
-                            state.login_box_y - 34, alert_w, 28)
-    pygame.draw.rect(state.screen, FAILED_ALERT_BG , alert_rect, border_radius=6)
-    alert_txt = state.ui_font.render("INVALID!", True, (255, 255, 255))
-    state.screen.blit(alert_txt, (alert_rect.x + 12, 
+    pygame.draw.rect(state.screen, bg_color, alert_rect, border_radius=6)
+    alert_txt = state.ui_font.render(alert_string, True, (255, 255, 255))
+    state.screen.blit(alert_txt, (alert_rect.x, 
                                   alert_rect.y + (alert_rect.height - alert_txt.get_height()) // 2))
 
 def draw_field_cursor(state):
@@ -165,3 +155,78 @@ def draw_field_cursor(state):
             caret_y1 = state.password_rect.y + 6
             caret_y2 = state.password_rect.y + state.password_rect.height - 6
             pygame.draw.line(state.screen, TEXT_COLOR, (caret_x, caret_y1), (caret_x, caret_y2), 2)
+
+
+def draw_admin_panel(state):
+    """Draw admin panel after successful bypass"""
+    padding = 40
+    start_y = state.browser_rect.y + 140
+    
+    # Welcome header
+    welcome_text = state.title_font.render("Welcome back, John", True, (67, 160, 71))
+    state.screen.blit(welcome_text, (state.browser_rect.x + padding, start_y))
+    
+    # Divider
+    header_div_y = start_y + 40
+    pygame.draw.line(state.screen, (220, 220, 220), 
+                     (state.browser_rect.x + padding, header_div_y), 
+                     (state.browser_rect.right - padding, header_div_y), 2)
+    
+    y = header_div_y + 30
+    
+    # Network Information Section
+    section_font_bold = pygame.font.Font(pygame.font.match_font('dejavusans', bold=True), state.ui_font.get_height())
+    section_title = section_font_bold.render("Network Information", True, TEXT_COLOR)
+    state.screen.blit(section_title, (state.browser_rect.x + padding, y))
+    y += 35
+    
+    
+    for label, value in network_info:
+        label_render = state.ui_font.render(label, True, (100, 100, 100))
+        value_render = state.ui_font.render(value, True, TEXT_COLOR)
+        state.screen.blit(label_render, (state.browser_rect.x + padding + 10, y))
+        state.screen.blit(value_render, (state.browser_rect.x + padding + 110, y))
+        y += 25
+    
+    y += 15
+    
+    # Connected Devices Section
+    section_title = section_font_bold.render("Connected Devices (4)", True, TEXT_COLOR)
+    state.screen.blit(section_title, (state.browser_rect.x + padding, y))
+    y += 35
+    
+    # Device list header
+    header_bg = pygame.Rect(state.browser_rect.x + padding, y, state.browser_rect.width - padding * 2, 30)
+    pygame.draw.rect(state.screen, (240, 240, 240), header_bg)
+    
+    device_header = state.ui_font.render("Device Name", True, (80, 80, 80))
+    ip_header = state.ui_font.render("IP Address", True, (80, 80, 80))
+    mac_header = state.ui_font.render("MAC Address", True, (80, 80, 80))
+    
+    state.screen.blit(device_header, (state.browser_rect.x + padding + 10, y + 7))
+    state.screen.blit(ip_header, (state.browser_rect.x + padding + 250, y + 7))
+    state.screen.blit(mac_header, (state.browser_rect.x + padding + 430, y + 7))
+    y += 35
+    
+
+    
+    for i, (device, ip, mac) in enumerate(connected_devices):
+        # Alternating row colors
+        if i % 2 == 0:
+            row_bg = pygame.Rect(state.browser_rect.x + padding, y, state.browser_rect.width - padding * 2, 25)
+            pygame.draw.rect(state.screen, (248, 248, 248), row_bg)
+        
+        device_render = state.ui_font.render(device, True, TEXT_COLOR)
+        ip_render = state.ui_font.render(ip, True, TEXT_COLOR)
+        mac_render = state.ui_font.render(mac, True, (120, 120, 120))
+        
+        state.screen.blit(device_render, (state.browser_rect.x + padding + 10, y + 4))
+        state.screen.blit(ip_render, (state.browser_rect.x + padding + 250, y + 4))
+        state.screen.blit(mac_render, (state.browser_rect.x + padding + 430, y + 4))
+        y += 25
+    
+    y += 20
+    
+    # System info at bottom
+    system_info = state.ui_font.render("Firmware: v1.0.1u | Uptime: 42 days, 3 hours", True, (150, 150, 150))
+    state.screen.blit(system_info, (state.browser_rect.x + padding, y))

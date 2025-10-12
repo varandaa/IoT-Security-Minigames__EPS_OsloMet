@@ -7,7 +7,7 @@ class GameState:
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT), pygame.RESIZABLE)
-        pygame.display.set_caption("Hacker Terminal (resizable)")
+        pygame.display.set_caption("Hacker Terminal")
         
         # Terminal state
         self.input_text = ""
@@ -22,7 +22,9 @@ class GameState:
         
         # Browser state
         self.bypassed = False
-        self.failed_login = False
+        self.login_failed = False
+        self.show_admin_panel = False
+        self.bypass_time = 0
         self.browser_username = ""
         self.browser_password = ""
         self.browser_focus = None
@@ -51,7 +53,7 @@ class GameState:
         
         # Load logo
         try:
-            self.logo = pygame.image.load("assets/routesimple.png").convert_alpha()
+            self.logo = pygame.image.load("./assets/routesimple.png").convert_alpha()
         except pygame.error:
             print("Error loading image")
             self.logo = None
@@ -72,3 +74,8 @@ class GameState:
         if self.browser_cursor_timer >= self.browser_cursor_blink_speed:
             self.browser_cursor_visible = not self.browser_cursor_visible
             self.browser_cursor_timer = 0
+        
+        # Check if we should show admin panel (2 seconds after bypass)
+        if self.bypassed and not self.show_admin_panel:
+            if pygame.time.get_ticks() - self.bypass_time > 2000:
+                self.show_admin_panel = True

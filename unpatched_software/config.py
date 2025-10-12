@@ -71,6 +71,22 @@ PATH = {
 
 CORRECT_EXPLOIT="exploit-1.0.1u"
 
+connected_devices = [
+    ("iPhone-John", "192.168.1.75", "A4:83:E7:2F:11:8C"),
+    ("RealViewCamera-1", "192.168.1.102", "00:1B:44:11:3A:B7"),
+    ("CozyHomePod", "192.168.1.114", "B8:27:EB:A3:2D:1F"),
+    ("SafeSecureDoorLock", "192.168.1.223", "F0:18:98:6C:4E:2A"),
+]
+
+network_info = [
+    ("Network Name (SSID):", "                        Jonh-WiFi-5G"),
+    ("Security:", "WPA3-PSK"),
+    ("Channel:", "Auto (5GHz)"),
+    ("IP Address:", "    192.168.1.1"),
+    ("Subnet Mask:", "        255.255.255.0"),
+    ("DHCP Server:", "         Enabled"),
+]
+
 WIDTH = 1920
 HEIGHT = 1080
 BLACK = (0, 0, 0)
