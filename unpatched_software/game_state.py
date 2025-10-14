@@ -30,18 +30,37 @@ class GameState:
         # File system
         self.current_folder = "/devices"
         self.level = 1
-        
-        # Browser state
-        self.bypassed = False
-        self.login_failed = False
-        self.show_admin_panel = False
-        self.bypass_time = 0
-        self.browser_username = ""
-        self.browser_password = ""
-        self.browser_focus = None
+
+        # Browser global state (cursor, focus)
+        # These properties are shared across all pages
         self.browser_cursor_visible = True
         self.browser_cursor_timer = 0
         self.browser_cursor_blink_speed = 500
+        self.browser_focus = None  # Which field is focused (username, password, etc.)
+
+        # Browser pages state
+        # Each page has its own login, bypass, etc.
+        self.browser_pages = [
+            {
+                "url": "http://192.168.1.1/login",
+                "bypassed": False,
+                "login_failed": False,
+                "show_admin_panel": False,
+                "bypass_time": 0,
+                "username": "",
+                "password": ""
+            },
+            {
+                "url": "http://192.168.1.1/admin",
+                "bypassed": True,  # Admin page is only shown after bypass
+                "login_failed": False,
+                "show_admin_panel": True,
+                "bypass_time": 0,
+                "username": "admin",
+                "password": ""
+            }
+        ]
+        self.current_page_index = 0  # Start on login page
         
         # Clock
         self.clock = pygame.time.Clock()
@@ -72,21 +91,49 @@ class GameState:
         # Initialize layout
         from ui.layout import update_layout
         update_layout(self)
+
+    # Property to access the current page's data
+    @property
+    def current_page(self):
+        return self.browser_pages[self.current_page_index]
+
+    # Methods to switch pages
+    def go_to_page(self, index):
+        """Switch to any browser page by index."""
+        if 0 <= index < len(self.browser_pages):
+            self.current_page_index = index
+
+    def add_page(self, url):
+        """Add a new browser page with default properties."""
+        self.browser_pages.append({
+            "url": url,
+            "bypassed": False,
+            "login_failed": False,
+            "show_admin_panel": False,
+            "bypass_time": 0,
+            "username": "",
+            "password": ""
+        })
     
     def update_cursors(self, dt):
-        """Update cursor blink timers"""
+        """Update cursor blink timers (global and current page)"""
         self.cursor_timer += dt
         self.browser_cursor_timer += dt
-        
+
         if self.cursor_timer >= self.cursor_blink_speed:
             self.cursor_visible = not self.cursor_visible
             self.cursor_timer = 0
-        
+
         if self.browser_cursor_timer >= self.browser_cursor_blink_speed:
             self.browser_cursor_visible = not self.browser_cursor_visible
             self.browser_cursor_timer = 0
-        
-        # Check if we should show admin panel (2 seconds after bypass)
-        if self.bypassed and not self.show_admin_panel:
-            if pygame.time.get_ticks() - self.bypass_time > 2000:
-                self.show_admin_panel = True
+
+    def check_transition(self):
+        self.check_admin_panel_transition()
+
+    def check_admin_panel_transition(self):
+        # Check if we should show admin panel (2 seconds after bypass) for current page
+        if self.current_page["bypassed"] and not self.current_page["show_admin_panel"]:
+            if pygame.time.get_ticks() - self.current_page["bypass_time"] > 2000:
+                self.current_page["show_admin_panel"] = True
+                self.go_to_page(1)  # Automatically switch to admin page

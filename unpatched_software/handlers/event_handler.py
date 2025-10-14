@@ -11,6 +11,7 @@ def handle_events(state, event):
 
 def handle_keyboard(state, event):
     """Handle keyboard input"""
+    page = state.current_page
     if event.key == pygame.K_RETURN:
         if state.browser_focus is not None:
             login_attempt(state)
@@ -18,24 +19,21 @@ def handle_keyboard(state, event):
             state.output_lines.append(state.current_folder + "> " + state.input_text)
             execute_command(state, state.input_text)
             state.input_text = ""
-    
     elif event.key == pygame.K_BACKSPACE:
         if state.browser_focus == "username":
-            state.browser_username = state.browser_username[:-1]
+            page["username"] = page["username"][:-1]
         elif state.browser_focus == "password":
-            state.browser_password = state.browser_password[:-1]
+            page["password"] = page["password"][:-1]
         else:
             state.input_text = state.input_text[:-1]
-    
     elif event.key == pygame.K_l and (event.mod & pygame.KMOD_CTRL):
         execute_command(state, "clear")
-    
     else:
         if event.unicode and event.unicode.isprintable():
             if state.browser_focus == "username":
-                state.browser_username += event.unicode
+                page["username"] += event.unicode
             elif state.browser_focus == "password":
-                state.browser_password += event.unicode
+                page["password"] += event.unicode
             else:
                 state.input_text += event.unicode
 

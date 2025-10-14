@@ -16,6 +16,7 @@ def main():
     while True:
         dt = state.clock.tick(30)
         state.update_cursors(dt)
+        state.check_transition()
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

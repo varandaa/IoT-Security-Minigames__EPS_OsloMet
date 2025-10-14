@@ -9,26 +9,26 @@ def draw_browser(state):
     pygame.draw.rect(state.screen, BROWSER_BG, state.browser_rect)
     
     
-    if state.show_admin_panel:
-        draw_topbar(state, "http://192.168.1.1/admin")
-        # Show admin panel instead of login
+    page = state.current_page
+    # Display page based on URL
+    if page["url"].endswith("/admin"):
+        draw_topbar(state, page["url"])
         draw_admin_panel(state)
-    else:
-        # Show login screen
-        draw_topbar(state, "http://192.168.1.1/login")
+    elif page["url"].endswith("/login"):
+        draw_topbar(state, page["url"])
         draw_header(state)
         draw_logo(state)
         draw_login_box(state)
         draw_fields(state)
         draw_version(state)
-
-        # print(state.login_failed)        
         # Bypass alert
-        if state.bypassed or state.login_failed:
-            draw_alert(state, state.bypassed)
-        
+        if page["bypassed"] or page["login_failed"]:
+            draw_alert(state, page["bypassed"])
         # Cursor in focused field
         draw_field_cursor(state)
+    else:
+        # Unknown page: show blank or error
+        draw_topbar(state, page["url"])
 
 def draw_topbar(state, url):
     """Draw browser address bar"""
@@ -92,17 +92,17 @@ def draw_fields(state):
     # Username field
     pygame.draw.rect(state.screen, FIELD_BG, state.username_rect)
     pygame.draw.rect(state.screen, FIELD_BORDER, state.username_rect, 1)
-    username_display = state.browser_username if state.browser_username else "enter username"
-    username_color = TEXT_COLOR if state.browser_username else (140, 140, 140)
+    page = state.current_page
+    username_display = page["username"] if page["username"] else "enter username"
+    username_color = TEXT_COLOR if page["username"] else (140, 140, 140)
     uname_render = state.ui_font.render(username_display, True, username_color)
     state.screen.blit(uname_render, (state.username_rect.x + 8, 
                                      state.username_rect.y + (state.username_rect.height - uname_render.get_height()) // 2))
-    
     # Password field
     pygame.draw.rect(state.screen, FIELD_BG, state.password_rect)
     pygame.draw.rect(state.screen, FIELD_BORDER, state.password_rect, 1)
-    if state.browser_password:
-        pwd_display = "*" * len(state.browser_password)
+    if page["password"]:
+        pwd_display = "*" * len(page["password"])
         pwd_render = state.ui_font.render(pwd_display, True, TEXT_COLOR)
     else:
         pwd_render = state.ui_font.render("enter password", True, (140, 140, 140))
@@ -144,14 +144,15 @@ def draw_alert(state, bypassed):
 
 def draw_field_cursor(state):
     """Draw blinking cursor in focused field"""
+    page = state.current_page
     if state.browser_focus is not None and state.browser_cursor_visible:
         if state.browser_focus == "username":
-            caret_x = state.username_rect.x + 8 + state.ui_font.size(state.browser_username)[0]
+            caret_x = state.username_rect.x + 8 + state.ui_font.size(page["username"])[0]
             caret_y1 = state.username_rect.y + 6
             caret_y2 = state.username_rect.y + state.username_rect.height - 6
             pygame.draw.line(state.screen, TEXT_COLOR, (caret_x, caret_y1), (caret_x, caret_y2), 2)
         elif state.browser_focus == "password":
-            caret_x = state.password_rect.x + 8 + state.ui_font.size("*" * len(state.browser_password))[0]
+            caret_x = state.password_rect.x + 8 + state.ui_font.size("*" * len(page["password"]))[0]
             caret_y1 = state.password_rect.y + 6
             caret_y2 = state.password_rect.y + state.password_rect.height - 6
             pygame.draw.line(state.screen, TEXT_COLOR, (caret_x, caret_y1), (caret_x, caret_y2), 2)

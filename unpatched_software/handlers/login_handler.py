@@ -1,14 +1,12 @@
 def login_attempt(state):
-    """Handle login attempt in browser"""
-    
-    state.browser_username = ""
-    state.browser_password = ""
+    """Handle login attempt in browser (per page)"""
+    page = state.current_page
+    page["username"] = ""
+    page["password"] = ""
     state.browser_focus = None
-    
-    if state.bypassed:
-        state.login_failed = False
+    if page["bypassed"]:
+        page["login_failed"] = False
         return True
     else:
-       # print("login failed")
-        state.login_failed = True
+        page["login_failed"] = True
         return False
