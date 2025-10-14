@@ -41,8 +41,19 @@ class GameState:
         # Browser pages state
         # Each page has its own login, bypass, etc.
         self.browser_pages = [
+            # Camera open to internet
             {
-                "url": "http://192.168.1.1/login",
+                "url": "http://145.40.68.12:8080/login",
+                "bypassed": False,
+                "login_failed": False,
+                "show_admin_panel": False,
+                "bypass_time": 0,
+                "username": "",
+                "password": "",
+                "logo_path": "./assets/camera.png"
+            },
+            {
+                "url": "http://145.40.68.12:8080/video",
                 "bypassed": False,
                 "login_failed": False,
                 "show_admin_panel": False,
@@ -50,6 +61,18 @@ class GameState:
                 "username": "",
                 "password": ""
             },
+            # RouterSimple
+            {
+                "url": "http://192.168.1.1/login",
+                "bypassed": False,
+                "login_failed": False,
+                "show_admin_panel": False,
+                "bypass_time": 0,
+                "username": "",
+                "password": "",
+                "logo_path": "./assets/routesimple.png"
+            },
+            # RouterSimple Admin Panel
             {
                 "url": "http://192.168.1.1/admin",
                 "bypassed": True,  # Admin page is only shown after bypass
@@ -60,7 +83,7 @@ class GameState:
                 "password": ""
             }
         ]
-        self.current_page_index = 0  # Start on login page
+        self.current_page_index = 0  # Start page index
         
         # Clock
         self.clock = pygame.time.Clock()
@@ -81,12 +104,12 @@ class GameState:
         self.password_rect = pygame.Rect(0, 0, 340, 36)
         self.login_button_rect = pygame.Rect(0, 0, 340, 36)
         
-        # Load logo
-        try:
-            self.logo = pygame.image.load("./assets/routesimple.png").convert_alpha()
-        except pygame.error:
-            print("Error loading image")
-            self.logo = None
+        # # Load logo
+        # try:
+        #     self.logo = pygame.image.load("./assets/routesimple.png").convert_alpha()
+        # except pygame.error:
+        #     print("Error loading image")
+        #     self.logo = None
         
         # Initialize layout
         from ui.layout import update_layout
@@ -136,4 +159,4 @@ class GameState:
         if self.current_page["bypassed"] and not self.current_page["show_admin_panel"]:
             if pygame.time.get_ticks() - self.current_page["bypass_time"] > 2000:
                 self.current_page["show_admin_panel"] = True
-                self.go_to_page(1)  # Automatically switch to admin page
+                self.go_to_page(3)  # Automatically switch to admin page

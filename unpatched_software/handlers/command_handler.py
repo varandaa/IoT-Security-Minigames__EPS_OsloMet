@@ -102,6 +102,15 @@ def run_exploit(state, exploit):
                 state.current_page["bypass_time"] = pygame.time.get_ticks()
             else:
                 state.output_lines.append("[-]This version of RouteSimple isn't vulnerable to this exploit. Maybe try a different one?")
+        elif state.current_folder == "/devices/BruteForce":
+            state.output_lines.append("[+]SmartCamPro camera has been found! (IP: 145.40.68.12)")
+            # Simulate brute force attack
+            wait(state, 2)
+            state.output_lines.append("[+]Starting brute force attack using " + exploit + "...")
+            wait(state, 5)
+            state.output_lines.append("[!]Brute force successful! The camera login has been bypassed!")
+            state.current_page["bypassed"] = True
+            state.go_to_page(1)  # Go to camera login page
         else:
             state.output_lines.append("[-]This device wasn't found on the network. What is the device you're trying to attack?")
     else:

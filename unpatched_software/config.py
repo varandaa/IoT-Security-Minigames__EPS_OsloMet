@@ -3,7 +3,8 @@ PATH = {
         "SuperSmartToaster", "InternetOfFood",
         "SmartFridge", "CityLightController", "ThermoSenseX",
         "AutoGarden", "DoorGuardian", "SmartCamPro",
-        "TrafficBeacon", "MediPump", "ParkSensor","RouteSimple", "EnergyMeter"
+        "TrafficBeacon", "MediPump", "ParkSensor","RouteSimple", "EnergyMeter",
+        "BruteForce"
     ],
 
     "RouteSimple": [
@@ -66,6 +67,10 @@ PATH = {
     "EnergyMeter": [
         "exploit-4.0.0", "exploit-3.2.1", "exploit-3.2.1a",
         "exploit-2.9.9-beta"
+    ],
+
+    "BruteForce" : [
+        "hydra", "medusa", "ncrack", "patator", "crowbar"
     ]
 }
 

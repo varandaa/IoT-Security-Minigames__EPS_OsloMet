@@ -1,6 +1,9 @@
 import pygame
 from handlers.command_handler import execute_command
 from handlers.login_handler import login_attempt
+import cv2
+
+cap = cv2.VideoCapture(0)
 
 def handle_events(state, event):
     """Handle keyboard and mouse events"""
@@ -40,13 +43,27 @@ def handle_keyboard(state, event):
 def handle_mouse(state, event):
     """Handle mouse clicks"""
     mx, my = event.pos
-    
-    if state.username_rect.collidepoint((mx, my)):
-        state.browser_focus = "username"
-    elif state.password_rect.collidepoint((mx, my)):
-        state.browser_focus = "password"
-    elif state.login_button_rect.collidepoint((mx, my)):
-        login_attempt(state)
+
+    connection_pages = [ 0, 2 ]  # Indexes of pages that can connect to others
+
+    page = state.current_page
+    if state.current_page_index in connection_pages:
+        if state.username_rect.collidepoint((mx, my)):
+            state.browser_focus = "username"
+        elif state.password_rect.collidepoint((mx, my)):
+            state.browser_focus = "password"
+        elif state.login_button_rect.collidepoint((mx, my)):
+            login_attempt(state)
+    elif page["url"] == "http://145.40.68.12:8080/video":
+        btn_width = 220
+        btn_height = 48
+        btn_x = state.browser_rect.x + (state.browser_rect.width - btn_width) // 2
+        topbar_height = max(40, int(state.HEIGHT * 0.04)) + 16
+        btn_y = state.browser_rect.y + state.browser_rect.height - btn_height - 32
+        btn_rect = pygame.Rect(btn_x, btn_y, btn_width, btn_height)
+        if btn_rect.collidepoint(event.pos):
+            #cap.release()
+            state.go_to_page(2)  # go to "http://192.168.1.1/login"
     else:
         if state.browser_rect.collidepoint((mx, my)):
             state.browser_focus = None
