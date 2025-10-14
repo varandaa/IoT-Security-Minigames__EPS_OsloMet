@@ -1,9 +1,20 @@
 import pygame
 from config import WIDTH, HEIGHT
+import ctypes
 
 class GameState:
     def __init__(self):
         # Window setup
+
+        # don't use the scale of windows
+        try:
+            ctypes.windll.shcore.SetProcessDpiAwareness(1)  # Windows 8.1+
+        except Exception:
+            try:
+                ctypes.windll.user32.SetProcessDPIAware()  # Windows 7
+            except Exception:
+                pass
+
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT), pygame.RESIZABLE)
