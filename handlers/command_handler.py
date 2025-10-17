@@ -122,7 +122,7 @@ def run_exploit(state, exploit):
             if (state.current_page_index != 2):
                 print("Already hacked")
             else:
-                state.output_lines.append("[+]SmartCamPro camera has been found! (IP: 145.40.68.12)")
+                state.output_lines.append("[+]SmartCamPro camera has been found! (IP: 192.168.1.102)")
                 # Simulate brute force attack
                 wait(state, 2)
                 state.output_lines.append("[+]Starting brute force attack using " + exploit + "...")

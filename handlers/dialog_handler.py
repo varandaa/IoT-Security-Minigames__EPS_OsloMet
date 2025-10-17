@@ -2,7 +2,7 @@ import pygame
 import os
 
 ASSETS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "assets")
-CLIPPY_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "assets", "hacker_clippy.png")
+CLIPPY_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "hacker_clippy.png")
 
 
 def start_dialog(state, lines, char_delay=25, image_path=None):
