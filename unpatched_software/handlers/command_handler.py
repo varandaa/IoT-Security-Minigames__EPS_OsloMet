@@ -5,6 +5,10 @@ from ui.browser import draw_browser
 import pygame
 import sys
 
+# Minigames
+from minigames import camera as camera_minigame
+from minigames import router as router_minigame
+
 def wait(state, seconds):
     """Wait while processing events"""
     draw_terminal(state)
@@ -86,31 +90,20 @@ def run_exploit(state, exploit):
         wait(state, 3)
         
         if state.current_folder == "/devices/RouteSimple":
-            state.output_lines.append("[!]RouteSimple Router has been found! (IP: 192.168.1.1)")
-            wait(state, 1)
-            state.output_lines.append("[+]Checking if this version is vulnerable...")
-            wait(state, 2)
-            
-            if exploit == config.CORRECT_EXPLOIT:
-                state.output_lines.append("[!]It's vulnerable!")
-                wait(state, 1)
-                state.output_lines.append("[+]Sending payload...")
-                wait(state, 3)
-                state.output_lines.append("[!]The RouteSimple router login has been bypassed!")
-                state.current_page["bypassed"] = True
-                wait(state, 1)
-                state.current_page["bypass_time"] = pygame.time.get_ticks()
+            # Delegate router exploit handling to the router minigame module
+            router_minigame.on_exploit_attempt(state, exploit)
+        elif state.current_folder == "/devices/BruteForce" and state.curren:
+            # Delegate camera bruteforce handling to the camera minigame module
+            if (state.current_page_index != 2):
+                print("Already hacked")
             else:
-                state.output_lines.append("[-]This version of RouteSimple isn't vulnerable to this exploit. Maybe try a different one?")
-        elif state.current_folder == "/devices/BruteForce":
-            state.output_lines.append("[+]SmartCamPro camera has been found! (IP: 145.40.68.12)")
-            # Simulate brute force attack
-            wait(state, 2)
-            state.output_lines.append("[+]Starting brute force attack using " + exploit + "...")
-            wait(state, 5)
-            state.output_lines.append("[!]Brute force successful! The camera login has been bypassed!")
-            state.current_page["bypassed"] = True
-            state.go_to_page(1)  # Go to camera login page
+                state.output_lines.append("[+]SmartCamPro camera has been found! (IP: 145.40.68.12)")
+                # Simulate brute force attack
+                wait(state, 2)
+                state.output_lines.append("[+]Starting brute force attack using " + exploit + "...")
+                wait(state, 5)
+                # Use camera minigame handler
+                camera_minigame.on_bruteforce_success(state, exploit)
         else:
             state.output_lines.append("[-]This device wasn't found on the network. What is the device you're trying to attack?")
     else:

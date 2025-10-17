@@ -41,27 +41,7 @@ class GameState:
         # Browser pages state
         # Each page has its own login, bypass, etc.
         self.browser_pages = [
-            # Camera open to internet
-            {
-                "url": "http://145.40.68.12:8080/login",
-                "bypassed": False,
-                "login_failed": False,
-                "show_admin_panel": False,
-                "bypass_time": 0,
-                "username": "",
-                "password": "",
-                "logo_path": "./assets/camera.png"
-            },
-            {
-                "url": "http://145.40.68.12:8080/video",
-                "bypassed": False,
-                "login_failed": False,
-                "show_admin_panel": False,
-                "bypass_time": 0,
-                "username": "",
-                "password": ""
-            },
-            # RouterSimple
+            # RouteSimple Login
             {
                 "url": "http://192.168.1.1/login",
                 "bypassed": False,
@@ -72,7 +52,7 @@ class GameState:
                 "password": "",
                 "logo_path": "./assets/routesimple.png"
             },
-            # RouterSimple Admin Panel
+            # RouteSimple Admin Panel
             {
                 "url": "http://192.168.1.1/admin",
                 "bypassed": True,  # Admin page is only shown after bypass
@@ -81,9 +61,29 @@ class GameState:
                 "bypass_time": 0,
                 "username": "admin",
                 "password": ""
+            },
+            {
+                "url": "http://192.168.1.102/login",
+                "bypassed": False,
+                "login_failed": False,
+                "show_admin_panel": False,
+                "bypass_time": 0,
+                "username": "",
+                "password": "",
+                "logo_path": "./assets/camera.png"
+            },
+            {
+                "url": "http://192.168.1.102/video",
+                "bypassed": False,
+                "login_failed": False,
+                "show_admin_panel": False,
+                "bypass_time": 0,
+                "username": "",
+                "password": ""
             }
         ]
-        self.current_page_index = 0  # Start page index
+    # Start at the router login page so the flow begins with the router
+        self.current_page_index = 0  # Start page index (router login)
         
         # Clock
         self.clock = pygame.time.Clock()

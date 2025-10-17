@@ -2,12 +2,8 @@ import pygame
 from config import (BROWSER_BG, TOPBAR_BG, TEXT_COLOR, FIELD_BG, 
                    FIELD_BORDER, BUTTON_BG, BUTTON_TEXT, BYPASS_ALERT_BG,
                     FAILED_ALERT_BG, connected_devices, network_info)
-import cv2
-
-# OpenCV camera setup
-cap = cv2.VideoCapture(0)
-if not cap.isOpened():
-    print("Error: Unable to access the camera.")
+from minigames import camera as camera_minigame
+cap = camera_minigame.cap
 
 def draw_browser(state):
     """Draw the browser pane (right side)"""
@@ -77,7 +73,7 @@ def draw_video_feed(state):
         return
 
     # Convert frame to RGB and resize to area below top bar
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    frame = camera_minigame.cv2.cvtColor(frame, camera_minigame.cv2.COLOR_BGR2RGB)
     browser_rect = state.browser_rect
     # Calculate top bar height (same as in draw_topbar)
     topbar_height = max(40, int(state.HEIGHT * 0.04)) + 16  # 8px padding top and bottom
@@ -85,7 +81,7 @@ def draw_video_feed(state):
     video_y = browser_rect.y + topbar_height
     video_width = browser_rect.width
     video_height = browser_rect.height - topbar_height
-    frame = cv2.resize(frame, (video_width, video_height))
+    frame = camera_minigame.cv2.resize(frame, (video_width, video_height))
     frame_surface = pygame.image.frombuffer(frame.tobytes(), frame.shape[1::-1], 'RGB')
     state.screen.blit(frame_surface, (video_x, video_y))
 
@@ -391,20 +387,46 @@ def draw_admin_panel(state):
     
 
     
+    # Prepare clickable device links storage (cleared each draw)
+    state.device_links = []
+
+    # Link color like an URL
+    LINK_COLOR = (0, 102, 204)
+
+    # Compute row height with some breathing room so rows aren't cramped
+    font_h = state.ui_font.get_height()
+    row_height = max(36, font_h + 14)
+
     for i, (device, ip, mac) in enumerate(connected_devices):
         # Alternating row colors
         if i % 2 == 0:
-            row_bg = pygame.Rect(state.browser_rect.x + padding, y, state.browser_rect.width - padding * 2, 25)
+            row_bg = pygame.Rect(state.browser_rect.x + padding, y, state.browser_rect.width - padding * 2, row_height)
             pygame.draw.rect(state.screen, (248, 248, 248), row_bg)
-        
-        device_render = state.ui_font.render(device, True, TEXT_COLOR)
+
+        # Render device name as a blue link-like text
+        device_render = state.ui_font.render(device, True, LINK_COLOR)
         ip_render = state.ui_font.render(ip, True, TEXT_COLOR)
         mac_render = state.ui_font.render(mac, True, (120, 120, 120))
-        
-        state.screen.blit(device_render, (state.browser_rect.x + padding + 10, y + 4))
-        state.screen.blit(ip_render, (state.browser_rect.x + padding + 250, y + 4))
-        state.screen.blit(mac_render, (state.browser_rect.x + padding + 430, y + 4))
-        y += 25
+
+        # Center text vertically in the row
+        txt_w = device_render.get_width()
+        txt_h = device_render.get_height()
+        dev_x = state.browser_rect.x + padding + 10
+        dev_y = y + (row_height - txt_h) // 2
+        state.screen.blit(device_render, (dev_x, dev_y))
+
+        # Underline to indicate a link (inside the row so it's not overdrawn)
+        underline_y = dev_y + txt_h + 2
+        pygame.draw.line(state.screen, LINK_COLOR, (dev_x, underline_y), (dev_x + txt_w, underline_y), 2)
+
+        # Record clickable rect for the device name (include a few pixels below text so underline is clickable)
+        dev_rect = pygame.Rect(dev_x, dev_y, txt_w, txt_h + 6)
+        state.device_links.append({"name": device, "ip": ip, "mac": mac, "rect": dev_rect})
+
+        # IP and MAC, also vertically centered
+        state.screen.blit(ip_render, (state.browser_rect.x + padding + 250, y + (row_height - ip_render.get_height()) // 2))
+        state.screen.blit(mac_render, (state.browser_rect.x + padding + 430, y + (row_height - mac_render.get_height()) // 2))
+        y += row_height + 6
     
     y += 20
     

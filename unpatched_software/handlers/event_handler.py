@@ -1,9 +1,10 @@
 import pygame
 from handlers.command_handler import execute_command
 from handlers.login_handler import login_attempt
-import cv2
+from minigames import camera as camera_minigame
 
-cap = cv2.VideoCapture(0)
+# Use camera_minigame.cap when needing to control/release the camera
+cap = camera_minigame.cap
 
 def handle_events(state, event):
     """Handle keyboard and mouse events"""
@@ -54,6 +55,23 @@ def handle_mouse(state, event):
             state.browser_focus = "password"
         elif state.login_button_rect.collidepoint((mx, my)):
             login_attempt(state)
+    elif state.current_page["url"] == "http://192.168.1.1/admin":
+        # Admin page: handle clicks on connected device links
+        # state.device_links is populated when drawing the admin panel
+        links = getattr(state, "device_links", None)
+        if links:
+            for item in links:
+                if item["rect"].collidepoint((mx, my)):
+                    dev_name = item["name"]
+                    # If the device appears to be a camera, go to the camera login page
+                    if "cam" in dev_name.lower() or "camera" in dev_name.lower():
+                        state.go_to_page(0)  # camera login page
+                    else:
+                        # For other devices, create a new page entry and go there
+                        new_url = f"http://{item['ip']}/"
+                        state.add_page(new_url)
+                        state.go_to_page(len(state.browser_pages) - 1)
+                    return
     elif page["url"] == "http://145.40.68.12:8080/video":
         btn_width = 220
         btn_height = 48
@@ -62,7 +80,8 @@ def handle_mouse(state, event):
         btn_y = state.browser_rect.y + state.browser_rect.height - btn_height - 32
         btn_rect = pygame.Rect(btn_x, btn_y, btn_width, btn_height)
         if btn_rect.collidepoint(event.pos):
-            #cap.release()
+            # if needed, we could release the camera via cap.release()
+            # cap.release()
             state.go_to_page(2)  # go to "http://192.168.1.1/login"
     else:
         if state.browser_rect.collidepoint((mx, my)):
