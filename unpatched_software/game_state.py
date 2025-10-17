@@ -87,6 +87,10 @@ class GameState:
         
         # Clock
         self.clock = pygame.time.Clock()
+
+        # Progression: which stage the player has reached (index into config.STAGE_ORDER)
+        # Start at -1 (nothing hacked). When they bypass router, set to 0.
+        self.current_stage_index = -1
         
         # Fonts
         self.mono_font = None
@@ -159,4 +163,4 @@ class GameState:
         if self.current_page["bypassed"] and not self.current_page["show_admin_panel"]:
             if pygame.time.get_ticks() - self.current_page["bypass_time"] > 2000:
                 self.current_page["show_admin_panel"] = True
-                self.go_to_page(3)  # Automatically switch to admin page
+                self.go_to_page(1)  # Automatically switch to admin page

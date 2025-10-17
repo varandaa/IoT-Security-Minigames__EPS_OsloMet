@@ -107,3 +107,21 @@ BYPASS_ALERT_BG = (60, 180, 60)          # green alert for bypassed login
 FAILED_ALERT_BG = (255, 95, 86)          # green alert for bypassed login
 BORDER = (180, 180, 180)          # generic light border
 DARK_TERMINAL = (20, 20, 20)      # used for other browser areas
+
+# Define progression order (folders under /devices). Index 0 is the first stage.
+STAGE_ORDER = [
+    "RouteSimple",  # router
+    "BruteForce",   # camera (brute force folder in this project)
+    "iPhone",       # example next stage (iPhone-John)
+    "Other"         # fallback for remaining devices
+]
+
+# Map device name substrings to a stage index for admin-panel clicks
+DEVICE_STAGE_MAP = {
+    "cam": 1,
+    "camera": 1,
+    "iphone": 2,
+    "phone": 2,
+    "route": 0,
+    "routesimple": 0,
+}

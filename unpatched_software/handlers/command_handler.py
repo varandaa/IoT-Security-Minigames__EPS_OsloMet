@@ -32,6 +32,14 @@ def execute_command(state, cmd):
     
     if cmd == "help":
         show_help(state)
+    elif cmd == "dialogtest":
+        # Demo dialog sequence using dialog handler
+        from handlers import dialog_handler
+        dialog_handler.start_dialog(state, [
+            "Hey there — it's Clippy. I'm watching your network traffic.",
+            "If you compromise the router, you'll be able to jump to devices directly.",
+            "Press Enter to skip through the dialog."
+        ], char_delay=20)
     elif cmd == 'ls':
         list_files(state)
     elif cmd.split(" ")[0] == "cd":
@@ -89,10 +97,16 @@ def run_exploit(state, exploit):
         state.output_lines.append("[+]Scanning for the device on the network...")
         wait(state, 3)
         
-        if state.current_folder == "/devices/RouteSimple":
+        if state.current_folder == "/devices/RouteSimple" and state.current_page_index==0:
             # Delegate router exploit handling to the router minigame module
-            router_minigame.on_exploit_attempt(state, exploit)
-        elif state.current_folder == "/devices/BruteForce" and state.curren:
+            success = router_minigame.on_exploit_attempt(state, exploit)
+            if success:
+                # Defensive: ensure progression state reflects router hacked
+                try:
+                    state.current_stage_index = max(state.current_stage_index, 0)
+                except Exception:
+                    pass
+        elif state.current_folder == "/devices/BruteForce" and state.current_page_index==2:
             # Delegate camera bruteforce handling to the camera minigame module
             if (state.current_page_index != 2):
                 print("Already hacked")

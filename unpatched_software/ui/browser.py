@@ -4,6 +4,8 @@ from config import (BROWSER_BG, TOPBAR_BG, TEXT_COLOR, FIELD_BG,
                     FAILED_ALERT_BG, connected_devices, network_info)
 from minigames import camera as camera_minigame
 cap = camera_minigame.cap
+from handlers import dialog_handler
+
 
 def draw_browser(state):
     """Draw the browser pane (right side)"""
@@ -13,7 +15,7 @@ def draw_browser(state):
     page = state.current_page
 
     # Display page based on URL
-    if page["url"] == "http://145.40.68.12:8080/login":
+    if page["url"] == "http://192.168.1.102/login":
         draw_topbar(state, page["url"])
         draw_camera_header(state)
         draw_camera_logo(state)
@@ -25,7 +27,7 @@ def draw_browser(state):
             draw_alert(state, page["bypassed"])
         # Cursor in focused field
         draw_field_cursor(state)
-    elif page["url"] == "http://145.40.68.12:8080/video":
+    elif page["url"] == "http://192.168.1.102/video":
         draw_video_feed(state)
         draw_topbar(state, page["url"])
         draw_next_page_button(state)

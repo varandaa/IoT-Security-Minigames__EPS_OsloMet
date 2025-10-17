@@ -5,6 +5,7 @@ from ui.terminal import draw_terminal
 from ui.browser import draw_browser
 from handlers.event_handler import handle_events
 from handlers.resize_handler import handle_resize
+from handlers import dialog_handler
 
 def main():
     pygame.init()
@@ -16,6 +17,8 @@ def main():
     while True:
         dt = state.clock.tick(30)
         state.update_cursors(dt)
+        # Update dialog handler (typewriter animation)
+        dialog_handler.update_dialog(state, dt)
         state.check_transition()
         
         for event in pygame.event.get():
@@ -29,6 +32,8 @@ def main():
         
         draw_terminal(state)
         draw_browser(state)
+        # Draw dialog overlay if active
+        dialog_handler.draw_dialog(state)
         pygame.display.flip()
 
 if __name__ == "__main__":
