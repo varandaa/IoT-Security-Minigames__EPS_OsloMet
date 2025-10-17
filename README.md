@@ -3,3 +3,4 @@ Set of minigames used as part of an interactive exhibition that teaches users ab
 
 ## Game List:
   - **Unpatched Software**: Find the correct exploit to bypass the router's admin panel login
+  - **Brute Force**: Use hacking tools to guess the camera's credentials
