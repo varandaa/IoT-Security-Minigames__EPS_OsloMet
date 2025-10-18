@@ -5,6 +5,7 @@ from config import (BROWSER_BG, TOPBAR_BG, TEXT_COLOR, FIELD_BG,
 from minigames import camera as camera_minigame
 cap = camera_minigame.cap
 from handlers import dialog_handler
+from minigames.wifi import wifi_networks
 
 
 def draw_browser(state):
@@ -48,6 +49,9 @@ def draw_browser(state):
         draw_field_cursor(state)
     elif page["id"] == "empty":
         draw_topbar(state, page["url"])
+    elif page["id"] == "wifi_networks":
+        draw_topbar(state, page["url"])
+        draw_wifi_networks(state)
     else:
         # Unknown page: show blank or error
         draw_topbar(state, page["url"])
@@ -437,3 +441,58 @@ def draw_admin_panel(state):
     # System info at bottom
     system_info = state.ui_font.render("Firmware: v1.0.1u | Uptime: 42 days, 3 hours", True, (150, 150, 150))
     state.screen.blit(system_info, (state.browser_rect.x + padding, y))
+
+def draw_wifi_networks(state):
+    """Draw Wifi networks page."""
+    padding = 40
+    y = state.browser_rect.y + 140
+    
+    # Page title
+    title_text = state.title_font.render("Nearby Wifi Networks", True, TEXT_COLOR)
+    state.screen.blit(title_text, (state.browser_rect.x + padding, y))
+    y += 50
+    
+    for ssid, security, signal in wifi_networks:
+        # Parse numeric signal (expects strings like '-40 dBm')
+
+        # Determine number of bars (0..4) from signal strength
+        # Strong: >= -50 -> 4, -65..-51 -> 3, -75..-66 ->2, -85..-76->1, else 0
+        if signal >= -50:
+            bars = 4
+        elif signal >= -65:
+            bars = 3
+        elif signal >= -75:
+            bars = 2
+        elif signal >= -85:
+            bars = 1
+        else:
+            bars = 0
+
+        ssid_render = state.ui_font.render(ssid, True, TEXT_COLOR)
+        security_render = state.ui_font.render(security, True, (100, 100, 100))
+
+        # Draw signal icon (4 vertical bars) to the left of the SSID
+        icon_x = state.browser_rect.x + padding - 36
+        icon_base_y = y + ssid_render.get_height()
+        bar_width = 6
+        gap = 4
+        for i in range(4):
+            # height increases with bar index
+            h = (i + 1) * 6
+            bx = icon_x + i * (bar_width + gap)
+            by = icon_base_y - h
+            color = (180, 180, 180)  # default grey for empty
+            if i < bars:
+                # color by strength
+                if bars >= 3:
+                    color = (67, 160, 71)  # green
+                elif bars == 2:
+                    color = (255, 193, 7)  # amber
+                else:
+                    color = (239, 83, 80)  # red
+            pygame.draw.rect(state.screen, color, (bx + 10, by, bar_width, h))
+
+        state.screen.blit(ssid_render, (state.browser_rect.x + padding + 30, y))
+        state.screen.blit(security_render, (state.browser_rect.x + padding + 300, y))
+        
+        y += ssid_render.get_height() + 20

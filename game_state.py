@@ -1,6 +1,7 @@
 import pygame
 from config import WIDTH, HEIGHT
 import ctypes
+from handlers import dialog_handler
 
 class GameState:
     def __init__(self):
@@ -51,6 +52,16 @@ class GameState:
                 "username": "",
                 "password": "",
                 "logo_path": "./assets/routesimple.png"
+            },
+            {
+                "id": "wifi_networks",
+                "url": "http://localhost/wifi",
+                "bypassed": False,
+                "login_failed": False,
+                "show_admin_panel": False,
+                "bypass_time": 0,
+                "username": "",
+                "password": ""
             },
             # RouteSimple Login
             {
@@ -122,10 +133,13 @@ class GameState:
         self.username_rect = pygame.Rect(0, 0, 340, 36)
         self.password_rect = pygame.Rect(0, 0, 340, 36)
         self.login_button_rect = pygame.Rect(0, 0, 340, 36)
+
+        self.wifi_connected = False
         
         # Initialize layout
         from ui.layout import update_layout
         update_layout(self)
+        self.first_dialog()
 
     # Property to access the current page's data
     @property
@@ -144,6 +158,7 @@ class GameState:
             if page["id"] == page_id:
                 self.current_page_index = i
                 return
+        print(f"Page ID '{page_id}' not found.")
             
     def go_to_page_by_url(self, url):
         """Switch to a browser page by its URL."""
@@ -151,6 +166,7 @@ class GameState:
             if page["url"] == url:
                 self.current_page_index = i
                 return
+        print(f"Page URL '{url}' not found.")
 
     def add_page(self, id, url):
         """Add a new browser page with default properties."""
@@ -187,3 +203,17 @@ class GameState:
             if pygame.time.get_ticks() - self.current_page["bypass_time"] > 2000:
                 self.current_page["show_admin_panel"] = True
                 self.go_to_page_by_id("route_simple_admin")  # Automatically switch to admin page
+
+    def first_dialog(self):
+        dialog_handler.start_dialog(self, [
+            "Hello there! Welcome to your hacking terminal.",
+            "Your goal is to hack into various IoT devices on this network.",
+            "But also to get into the house.",
+            "Start by exploring the devices folder using 'ls' and 'cd' commands.",
+            "Find exploits to gain access to each device in order.",
+            "First you will need to get into the Wifi.",
+            "I think the first step is to use the wifi-analyser tool to find nearby networks.",
+            "Like the 'nmcli' command.",
+            "And remember, patience is key.",
+            "Good luck!"
+        ], char_delay=20)

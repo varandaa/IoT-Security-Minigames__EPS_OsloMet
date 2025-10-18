@@ -8,6 +8,7 @@ import sys
 # Minigames
 from minigames import camera as camera_minigame
 from minigames import router as router_minigame
+from minigames import wifi as wifi_minigame 
 from handlers import dialog_handler
 
 
@@ -51,6 +52,11 @@ def execute_command(state, cmd):
         state.output_lines = ["Welcome to Clippy's terminal.", "Type 'help' for commands."]
     elif cmd == "":
         pass
+    elif cmd == "nmcli":
+        state.output_lines.append("[+]Looking for nearby Wifi networks...")
+        wait(state, 1)
+        state.output_lines.append("[+]Web page with Wifi networks opened!")
+        wifi_minigame.on_wifi_analyser(state, cmd)
     else:
         state.output_lines.append(f"'{cmd}' is not recognized as a command.")
 
@@ -64,6 +70,7 @@ def show_help(state):
     state.output_lines.append("                         You can see the folder you're currently in behind the '>'")
     state.output_lines.append("  ./{exploit_name}  - Run an exploit")
     state.output_lines.append("  clear  - Clear the screen (can also use CTRL+L)")
+    state.output_lines.append("  nmcli  - Scan for nearby Wifi networks and open web page to view them")
 
 def list_files(state):
     """List files in current directory"""
@@ -88,8 +95,9 @@ def change_directory(state, cmd):
         else:
             state.output_lines.append(f"{folder} isn't a folder.")
 
-def run_exploit(state, exploit):
+def run_exploit(state, exploit_cmd):
     """Run an exploit"""
+    exploit = exploit_cmd.split(" ")[0]
     if exploit in config.PATH.get("devices"):
         state.output_lines.append("That is a folder. It isn't an exploit!")
     elif exploit in config.PATH.get(state.current_folder.split("/")[state.level]):
@@ -129,6 +137,9 @@ def run_exploit(state, exploit):
                 wait(state, 5)
                 # Use camera minigame handler
                 camera_minigame.on_bruteforce_success(state, exploit)
+        elif state.current_folder == "/devices/Wifi":
+            if exploit.startswith("fern-wifi-cracker"):
+                wifi_minigame.on_wifi_crack_attempt(state, exploit_cmd, wait)
         else:
             state.output_lines.append("[-]This device wasn't found on the network. What is the device you're trying to attack?")
     else:

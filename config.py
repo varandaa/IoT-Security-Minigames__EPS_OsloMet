@@ -4,7 +4,7 @@ PATH = {
         "SmartFridge", "CityLightController", "ThermoSenseX",
         "AutoGarden", "DoorGuardian", "SmartCamPro",
         "TrafficBeacon", "MediPump", "ParkSensor","RouteSimple", "EnergyMeter",
-        "BruteForce"
+        "BruteForce", "Wifi"
     ],
 
     "RouteSimple": [
@@ -71,6 +71,10 @@ PATH = {
 
     "BruteForce" : [
         "hydra", "medusa", "ncrack", "patator", "crowbar"
+    ],
+    
+    "Wifi": [
+        "aircrack-ng", "reaver", "bully", "fern-wifi-cracker", "wifite", "nmcli"
     ]
 }
 
