@@ -17,7 +17,7 @@ def on_bruteforce_success(state, exploit_name: str):
     state.output_lines.append("[+]Brute force successful! The camera login has been bypassed!")
     state.current_page["bypassed"] = True
     # switch to camera video page
-    state.go_to_page(3)
+    state.go_to_page_by_id("camera_video")
     
     dialog_handler.start_dialog(state, [
             "Nice!",

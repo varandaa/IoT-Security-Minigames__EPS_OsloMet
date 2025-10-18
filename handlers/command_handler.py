@@ -100,7 +100,7 @@ def run_exploit(state, exploit):
         
         if state.current_folder == "/devices/RouteSimple":
             # Delegate router exploit handling to the router minigame module
-            if state.current_page_index!=0:
+            if state.current_page["id"] != "route_simple_login":
                 dialog_handler.start_dialog(state, [
             "We already hacked the router!",
             "There is no need need to run these exploits again.",
@@ -117,9 +117,9 @@ def run_exploit(state, exploit):
                     except Exception:
                         pass
         
-        elif state.current_folder == "/devices/BruteForce" and state.current_page_index==2:
+        elif state.current_folder == "/devices/BruteForce" and state.current_page["id"]=="camera_login":
             # Delegate camera bruteforce handling to the camera minigame module
-            if (state.current_page_index != 2):
+            if (state.current_page["id"] != "camera_login"):
                 print("Already hacked")
             else:
                 state.output_lines.append("[+]SmartCamPro camera has been found! (IP: 192.168.1.102)")

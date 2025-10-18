@@ -41,8 +41,20 @@ class GameState:
         # Browser pages state
         # Each page has its own login, bypass, etc.
         self.browser_pages = [
+            {
+                "id": "empty",
+                "url": "http://192.168.1.1/login",
+                "bypassed": False,
+                "login_failed": False,
+                "show_admin_panel": False,
+                "bypass_time": 0,
+                "username": "",
+                "password": "",
+                "logo_path": "./assets/routesimple.png"
+            },
             # RouteSimple Login
             {
+                "id": "route_simple_login",
                 "url": "http://192.168.1.1/login",
                 "bypassed": False,
                 "login_failed": False,
@@ -54,6 +66,7 @@ class GameState:
             },
             # RouteSimple Admin Panel
             {
+                "id": "route_simple_admin",
                 "url": "http://192.168.1.1/admin",
                 "bypassed": True,  # Admin page is only shown after bypass
                 "login_failed": False,
@@ -63,6 +76,7 @@ class GameState:
                 "password": ""
             },
             {
+                "id": "camera_login",
                 "url": "http://192.168.1.102/login",
                 "bypassed": False,
                 "login_failed": False,
@@ -73,6 +87,7 @@ class GameState:
                 "logo_path": "./assets/camera.png"
             },
             {
+                "id": "camera_video",
                 "url": "http://192.168.1.102/video",
                 "bypassed": False,
                 "login_failed": False,
@@ -83,8 +98,9 @@ class GameState:
             }
         ]
     # Start at the router login page so the flow begins with the router
-        self.current_page_index = 0  # Start page index (router login)
-        
+        #self.current_page_index = 0  # Start page index (router login)
+        self.go_to_page_by_id("route_simple_login")
+
         # Clock
         self.clock = pygame.time.Clock()
 
@@ -130,9 +146,24 @@ class GameState:
         if 0 <= index < len(self.browser_pages):
             self.current_page_index = index
 
-    def add_page(self, url):
+    def go_to_page_by_id(self, page_id):
+        """Switch to a browser page by its ID."""
+        for i, page in enumerate(self.browser_pages):
+            if page["id"] == page_id:
+                self.current_page_index = i
+                return
+            
+    def go_to_page_by_url(self, url):
+        """Switch to a browser page by its URL."""
+        for i, page in enumerate(self.browser_pages):
+            if page["url"] == url:
+                self.current_page_index = i
+                return
+
+    def add_page(self, id, url):
         """Add a new browser page with default properties."""
         self.browser_pages.append({
+            "id": id,
             "url": url,
             "bypassed": False,
             "login_failed": False,
@@ -163,4 +194,4 @@ class GameState:
         if self.current_page["bypassed"] and not self.current_page["show_admin_panel"]:
             if pygame.time.get_ticks() - self.current_page["bypass_time"] > 2000:
                 self.current_page["show_admin_panel"] = True
-                self.go_to_page(1)  # Automatically switch to admin page
+                self.go_to_page_by_id("route_simple_admin")  # Automatically switch to admin page

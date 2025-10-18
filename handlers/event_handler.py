@@ -64,11 +64,11 @@ def handle_mouse(state, event):
     """Handle mouse clicks"""
     mx, my = event.pos
 
-    connection_pages = [ 0, 2 ]  # Indexes of pages that can connect to others
+    connection_pages = [ "route_simple_login", "camera_login" ]  # id of pages that can connect to others
 
     page = state.current_page
     if state.browser_rect.collidepoint((mx, my)):
-        if state.current_page_index in connection_pages:
+        if page["id"] in connection_pages:
             if state.username_rect.collidepoint((mx, my)):
                 state.browser_focus = "username"
             elif state.password_rect.collidepoint((mx, my)):
@@ -104,13 +104,13 @@ def handle_mouse(state, event):
 
                         # Allowed: perform navigation
                         if "cam" in dev_name.lower() or "camera" in dev_name.lower():
-                            state.go_to_page(2)  # camera login page
+                            state.go_to_page_by_id("camera_login")  # camera login page
                         # command_handler.change_directory(state, "cd ..")
                         else:
                             # For other devices, create a new page entry and go there
                             new_url = f"http://{item['ip']}/"
-                            state.add_page(new_url)
-                            state.go_to_page(len(state.browser_pages) - 1)
+                            state.add_page(new_url, new_url)
+                            state.go_to_page_by_url(new_url)
 
                         return
         elif page["url"] == "http://192.168.1.102/video":
@@ -123,7 +123,7 @@ def handle_mouse(state, event):
             if btn_rect.collidepoint(event.pos):
                 # if needed, we could release the camera via cap.release()
                 cap.release()
-                state.go_to_page(1)  # go to "http://192.168.1.1/admin"
+                state.go_to_page_by_id("route_simple_admin")  # go to "http://192.168.1.1/admin"
                 dialog_handler.start_dialog(state, [
                                 f"We're back on the admin panel.",
                                 "How about we try to hack the smart lamp now?",
@@ -131,9 +131,6 @@ def handle_mouse(state, event):
                                 "Know the time they wake up...",
                                 "The time they leave for work..."
                             ], char_delay=20)
-    else:
-        # if state.browser_rect.collidepoint((mx, my)):
-        #     state.browser_focus = None
-        if state.terminal_rect.collidepoint((mx, my)):
+    elif state.terminal_rect.collidepoint((mx, my)):
             state.browser_focus = None
 
