@@ -14,8 +14,8 @@ def draw_browser(state):
 
     page = state.current_page
 
-    # Display page based on URL
-    if page["url"] == "http://192.168.1.102/login":
+    # Display page based on page id
+    if page["id"] == "camera_login":
         draw_topbar(state, page["url"])
         draw_camera_header(state)
         draw_camera_logo(state)
@@ -27,14 +27,14 @@ def draw_browser(state):
             draw_alert(state, page["bypassed"])
         # Cursor in focused field
         draw_field_cursor(state)
-    elif page["url"] == "http://192.168.1.102/video":
+    elif page["id"] == "camera_video":
         draw_video_feed(state)
         draw_topbar(state, page["url"])
         draw_next_page_button(state)
-    elif page["url"] == "http://192.168.1.1/admin":
+    elif page["id"] == "route_simple_admin":
         draw_topbar(state, page["url"])
         draw_admin_panel(state)
-    elif page["url"] == "http://192.168.1.1/login":
+    elif page["id"] == "route_simple_login":
         draw_topbar(state, page["url"])
         draw_header(state)
         draw_logo(state)
@@ -46,6 +46,8 @@ def draw_browser(state):
             draw_alert(state, page["bypassed"])
         # Cursor in focused field
         draw_field_cursor(state)
+    elif page["id"] == "empty":
+        draw_topbar(state, page["url"])
     else:
         # Unknown page: show blank or error
         draw_topbar(state, page["url"])

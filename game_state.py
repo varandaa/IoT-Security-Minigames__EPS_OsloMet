@@ -43,7 +43,7 @@ class GameState:
         self.browser_pages = [
             {
                 "id": "empty",
-                "url": "http://192.168.1.1/login",
+                "url": "about:blank",
                 "bypassed": False,
                 "login_failed": False,
                 "show_admin_panel": False,
@@ -98,8 +98,7 @@ class GameState:
             }
         ]
     # Start at the router login page so the flow begins with the router
-        #self.current_page_index = 0  # Start page index (router login)
-        self.go_to_page_by_id("route_simple_login")
+        self.go_to_page_by_id("empty")
 
         # Clock
         self.clock = pygame.time.Clock()
@@ -123,13 +122,6 @@ class GameState:
         self.username_rect = pygame.Rect(0, 0, 340, 36)
         self.password_rect = pygame.Rect(0, 0, 340, 36)
         self.login_button_rect = pygame.Rect(0, 0, 340, 36)
-        
-        # # Load logo
-        # try:
-        #     self.logo = pygame.image.load("./assets/routesimple.png").convert_alpha()
-        # except pygame.error:
-        #     print("Error loading image")
-        #     self.logo = None
         
         # Initialize layout
         from ui.layout import update_layout
