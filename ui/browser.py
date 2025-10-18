@@ -170,42 +170,6 @@ def draw_camera_logo(state):
         logo_rect.bottom = state.login_box_y - 20
         state.screen.blit(logo_scaled, logo_rect)
 
-def draw_camera_fields(state):
-    """Draw username, password fields and login button for camera login"""
-    label_padding = 3
-    user_label_y = state.username_rect.y - (state.ui_font.get_height() + label_padding)
-    pass_label_y = state.password_rect.y - (state.ui_font.get_height() + label_padding)
-    user_label = state.ui_font.render("Camera User", True, TEXT_COLOR)
-    pass_label = state.ui_font.render("Camera Password", True, TEXT_COLOR)
-    state.screen.blit(user_label, (state.username_rect.x, user_label_y))
-    state.screen.blit(pass_label, (state.password_rect.x, pass_label_y))
-    # Username field
-    pygame.draw.rect(state.screen, FIELD_BG, state.username_rect)
-    pygame.draw.rect(state.screen, FIELD_BORDER, state.username_rect, 1)
-    page = state.current_page
-    username_display = page["username"] if page["username"] else "user"
-    username_color = TEXT_COLOR if page["username"] else (140, 140, 140)
-    uname_render = state.ui_font.render(username_display, True, username_color)
-    state.screen.blit(uname_render, (state.username_rect.x + 8,
-                                     state.username_rect.y + (state.username_rect.height - uname_render.get_height()) // 2))
-    # Password field
-    pygame.draw.rect(state.screen, FIELD_BG, state.password_rect)
-    pygame.draw.rect(state.screen, FIELD_BORDER, state.password_rect, 1)
-    if page["password"]:
-        pwd_display = "*" * len(page["password"])
-        pwd_render = state.ui_font.render(pwd_display, True, TEXT_COLOR)
-    else:
-        pwd_render = state.ui_font.render("password", True, (140, 140, 140))
-    state.screen.blit(pwd_render, (state.password_rect.x + 8,
-                                   state.password_rect.y + (state.password_rect.height - pwd_render.get_height()) // 2))
-    # Login button
-    pygame.draw.rect(state.screen, BUTTON_BG, state.login_button_rect, border_radius=6)
-    pygame.draw.rect(state.screen, (160, 160, 160), state.login_button_rect, 1, border_radius=6)
-    login_text = state.ui_font.render("Camera Login", True, BUTTON_TEXT)
-    tx = state.login_button_rect.x + (state.login_button_rect.width - login_text.get_width()) // 2
-    ty = state.login_button_rect.y + (state.login_button_rect.height - login_text.get_height()) // 2
-    state.screen.blit(login_text, (tx, ty))
-
 def draw_camera_version(state):
     """Draw version label below camera login box"""
     version_label = state.ui_font.render("Camera Web Interface v2.3.4", True, TEXT_COLOR)

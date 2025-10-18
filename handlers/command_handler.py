@@ -132,6 +132,9 @@ def run_exploit(state, exploit_cmd):
             else:
                 state.output_lines.append("[+]SmartCamPro camera has been found! (IP: 192.168.1.102)")
                 # Simulate brute force attack
+                state.current_page["is_being_brute_forced"] = True
+                state.current_page["username"] = "*******"
+                state.current_page["password"] = "*******"
                 wait(state, 2)
                 state.output_lines.append("[+]Starting brute force attack using " + exploit + "...")
                 wait(state, 5)
