@@ -67,72 +67,73 @@ def handle_mouse(state, event):
     connection_pages = [ 0, 2 ]  # Indexes of pages that can connect to others
 
     page = state.current_page
-    if state.current_page_index in connection_pages:
-        if state.username_rect.collidepoint((mx, my)):
-            state.browser_focus = "username"
-        elif state.password_rect.collidepoint((mx, my)):
-            state.browser_focus = "password"
-        elif state.login_button_rect.collidepoint((mx, my)):
-            login_attempt(state)
-    elif state.current_page["url"] == "http://192.168.1.1/admin":
-        # Admin page: handle clicks on connected device links
-        # state.device_links is populated when drawing the admin panel
-        links = getattr(state, "device_links", None)
-        if links:
-            from config import DEVICE_STAGE_MAP
-            for item in links:
-                if item["rect"].collidepoint((mx, my)):
-                    dev_name = item["name"]
-                    dev_key = dev_name.lower()
-                    # Determine required stage for this device (default to next stage)
-                    required_stage = 999
-                    for k, v in DEVICE_STAGE_MAP.items():
-                        if k in dev_key:
-                            required_stage = v
-                            break
+    if state.browser_rect.collidepoint((mx, my)):
+        if state.current_page_index in connection_pages:
+            if state.username_rect.collidepoint((mx, my)):
+                state.browser_focus = "username"
+            elif state.password_rect.collidepoint((mx, my)):
+                state.browser_focus = "password"
+            elif state.login_button_rect.collidepoint((mx, my)):
+                login_attempt(state)
+        elif state.current_page["url"] == "http://192.168.1.1/admin":
+            # Admin page: handle clicks on connected device links
+            # state.device_links is populated when drawing the admin panel
+            links = getattr(state, "device_links", None)
+            if links:
+                from config import DEVICE_STAGE_MAP
+                for item in links:
+                    if item["rect"].collidepoint((mx, my)):
+                        dev_name = item["name"]
+                        dev_key = dev_name.lower()
+                        # Determine required stage for this device (default to next stage)
+                        required_stage = 999
+                        for k, v in DEVICE_STAGE_MAP.items():
+                            if k in dev_key:
+                                required_stage = v
+                                break
 
-                    # Allow access if device's required_stage is <= current_stage_index + 1
-                    # (player can access the next stage after completing the previous one)
-                    if required_stage > (state.current_stage_index + 1):
-                        # blocked: show dialog explaining the order
-                        dialog_handler.start_dialog(state, [
-                            f"You can't access {dev_name} yet.",
-                            "You need to progress in the network in order. Try the required devices first."
-                        ], char_delay=20)
+                        # Allow access if device's required_stage is <= current_stage_index + 1
+                        # (player can access the next stage after completing the previous one)
+                        if required_stage > (state.current_stage_index + 1):
+                            # blocked: show dialog explaining the order
+                            dialog_handler.start_dialog(state, [
+                                f"You can't access {dev_name} yet.",
+                                "You need to progress in the network in order. Try the required devices first."
+                            ], char_delay=20)
+                            return
+
+                        # Allowed: perform navigation
+                        if "cam" in dev_name.lower() or "camera" in dev_name.lower():
+                            state.go_to_page(2)  # camera login page
+                        # command_handler.change_directory(state, "cd ..")
+                        else:
+                            # For other devices, create a new page entry and go there
+                            new_url = f"http://{item['ip']}/"
+                            state.add_page(new_url)
+                            state.go_to_page(len(state.browser_pages) - 1)
+
                         return
-
-                    # Allowed: perform navigation
-                    if "cam" in dev_name.lower() or "camera" in dev_name.lower():
-                        state.go_to_page(2)  # camera login page
-                       # command_handler.change_directory(state, "cd ..")
-                    else:
-                        # For other devices, create a new page entry and go there
-                        new_url = f"http://{item['ip']}/"
-                        state.add_page(new_url)
-                        state.go_to_page(len(state.browser_pages) - 1)
-
-                    return
-    elif page["url"] == "http://192.168.1.102/video":
-        btn_width = 220
-        btn_height = 48
-        btn_x = state.browser_rect.x + (state.browser_rect.width - btn_width) // 2
-        topbar_height = max(40, int(state.HEIGHT * 0.04)) + 16
-        btn_y = state.browser_rect.y + state.browser_rect.height - btn_height - 32
-        btn_rect = pygame.Rect(btn_x, btn_y, btn_width, btn_height)
-        if btn_rect.collidepoint(event.pos):
-            # if needed, we could release the camera via cap.release()
-            cap.release()
-            state.go_to_page(1)  # go to "http://192.168.1.1/admin"
-            dialog_handler.start_dialog(state, [
-                            f"We're back on the admin panel.",
-                            "How about we try to hack the smart lamp now?",
-                            "If we can see the time it usually turns on and off, we can track their schedule.",
-                            "Know the time they wake up...",
-                            "The time they leave for work..."
-                        ], char_delay=20)
+        elif page["url"] == "http://192.168.1.102/video":
+            btn_width = 220
+            btn_height = 48
+            btn_x = state.browser_rect.x + (state.browser_rect.width - btn_width) // 2
+            topbar_height = max(40, int(state.HEIGHT * 0.04)) + 16
+            btn_y = state.browser_rect.y + state.browser_rect.height - btn_height - 32
+            btn_rect = pygame.Rect(btn_x, btn_y, btn_width, btn_height)
+            if btn_rect.collidepoint(event.pos):
+                # if needed, we could release the camera via cap.release()
+                cap.release()
+                state.go_to_page(1)  # go to "http://192.168.1.1/admin"
+                dialog_handler.start_dialog(state, [
+                                f"We're back on the admin panel.",
+                                "How about we try to hack the smart lamp now?",
+                                "If we can see the time it usually turns on and off, we can track their schedule.",
+                                "Know the time they wake up...",
+                                "The time they leave for work..."
+                            ], char_delay=20)
     else:
-        if state.browser_rect.collidepoint((mx, my)):
-            state.browser_focus = None
+        # if state.browser_rect.collidepoint((mx, my)):
+        #     state.browser_focus = None
         if state.terminal_rect.collidepoint((mx, my)):
             state.browser_focus = None
 
