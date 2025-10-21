@@ -209,13 +209,12 @@ class GameState:
     def first_dialog(self):
         dialog_handler.start_dialog(self, [
             "Hello there! Welcome to your hacking terminal.",
-            "Your goal is to hack into various IoT devices on this network.",
-            "But also to get into the house.",
-            "Start by exploring the devices folder using 'ls' and 'cd' commands.",
-            "Find exploits to gain access to each device in order.",
+            "Your goal is to hack into various IoT devices on this network and ultiamtely get into the house.",
+            "You can type 'help' to display a list of useful commands.",
+            "Like 'ls' to list the contents of the folder you're in and 'cd' to go inside a different folder",
             "First you will need to get into the Wifi.",
-            "I think the first step is to use the wifi-analyser tool to find nearby networks.",
-            "Like the 'nmcli' command.",
-            "And remember, patience is key.",
+            "The first step is to use the wifi-analyser tool to find nearby networks.",
+            "Start by typing the 'nmcli' command.",
+            "If you get stuck at any time, you can press me on the bottom right corner to get some hints."
             "Good luck!"
         ], char_delay=20)

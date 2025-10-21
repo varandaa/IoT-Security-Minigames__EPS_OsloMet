@@ -64,6 +64,14 @@ def handle_mouse(state, event):
     """Handle mouse clicks"""
     mx, my = event.pos
 
+    # Check if Clippy icon was clicked (in terminal area)
+    clippy_rect = getattr(state, "clippy_rect", None)
+    if clippy_rect and clippy_rect.collidepoint((mx, my)):
+        from ui.terminal import get_help_dialog_for_page
+        help_text = get_help_dialog_for_page(state)
+        dialog_handler.start_dialog(state, help_text, char_delay=20)
+        return
+
     connection_pages = [ "route_simple_login", "camera_login" ]  # id of pages that can connect to others
 
     page = state.current_page
