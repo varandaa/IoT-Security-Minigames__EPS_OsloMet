@@ -39,6 +39,12 @@ def handle_keyboard(state, event):
         if state.browser_focus is not None:
             login_attempt(state)
         else:
+            # record command in history (ignore empty)
+            cmd = state.input_text.strip()
+            if cmd:
+                state.command_history.append(cmd)
+            # reset any history browsing
+            state.history_index = None
             state.output_lines.append(state.current_folder + "> " + state.input_text)
             execute_command(state, state.input_text)
             state.input_text = ""
@@ -51,6 +57,24 @@ def handle_keyboard(state, event):
             state.input_text = state.input_text[:-1]
     elif event.key == pygame.K_l and (event.mod & pygame.KMOD_CTRL):
         execute_command(state, "clear")
+    elif event.key == pygame.K_UP:
+        # Navigate up in history (older commands)
+        if state.command_history:
+            if state.history_index is None:
+                state.history_index = len(state.command_history) - 1
+            else:
+                state.history_index = max(0, state.history_index - 1)
+            state.input_text = state.command_history[state.history_index]
+    elif event.key == pygame.K_DOWN:
+        # Navigate down in history (newer commands)
+        if state.command_history and state.history_index is not None:
+            state.history_index = min(len(state.command_history) - 1, state.history_index + 1)
+            # If we've moved past the last, clear
+            if state.history_index >= len(state.command_history):
+                state.history_index = None
+                state.input_text = ""
+            else:
+                state.input_text = state.command_history[state.history_index]
     else:
         if event.unicode and event.unicode.isprintable():
             if state.browser_focus == "username":

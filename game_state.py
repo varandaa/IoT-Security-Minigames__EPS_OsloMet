@@ -24,6 +24,9 @@ class GameState:
         # Terminal state
         self.input_text = ""
         self.output_lines = ["Welcome to the Linux terminal.", "Type 'help' for commands."]
+        # Command history for terminal (for Up/Down navigation)
+        self.command_history = []  # list of previous commands (most recent last)
+        self.history_index = None  # None when not browsing history, otherwise index into command_history
         self.cursor_visible = True
         self.cursor_timer = 0
         self.cursor_blink_speed = 500
