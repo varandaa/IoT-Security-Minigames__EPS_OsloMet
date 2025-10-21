@@ -111,7 +111,7 @@ class GameState:
             }
         ]
     # Start at the router login page so the flow begins with the router
-        self.go_to_page_by_id("empty") # empty page at start
+        self.go_to_page_by_id("camera_login") # empty page at start
 
         # Clock
         self.clock = pygame.time.Clock()
@@ -201,10 +201,11 @@ class GameState:
 
     def check_admin_panel_transition(self):
         # Check if we should show admin panel (2 seconds after bypass) for current page
-        if self.current_page["bypassed"] and not self.current_page["show_admin_panel"]:
-            if pygame.time.get_ticks() - self.current_page["bypass_time"] > 2000:
-                self.current_page["show_admin_panel"] = True
-                self.go_to_page_by_id("route_simple_admin")  # Automatically switch to admin page
+        if self.current_page["id"] == "route_simple_login":
+            if self.current_page["bypassed"] and not self.current_page["show_admin_panel"]:
+                if pygame.time.get_ticks() - self.current_page["bypass_time"] > 2000:
+                    self.current_page["show_admin_panel"] = True
+                    self.go_to_page_by_id("route_simple_admin")  # Automatically switch to admin page
 
     def first_dialog(self):
         dialog_handler.start_dialog(self, [

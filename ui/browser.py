@@ -139,6 +139,24 @@ def draw_camera_fields(state):
     ty = state.login_button_rect.y + (state.login_button_rect.height - login_text.get_height()) // 2
     state.screen.blit(login_text, (tx, ty))
 
+    # Camera-specific status messages:
+    # - show a red "Invalid login" while brute-forcing is active
+    # - show a green "Login in" when the page has been bypassed
+    try:
+        if page.get("is_being_brute_forced"):
+            status_txt = state.ui_font.render("Invalid login", True, (239, 83, 80))
+            sx = state.login_box_x + (state.login_box_w - status_txt.get_width()) // 2
+            sy = state.login_box_y - 42
+            state.screen.blit(status_txt, (sx, sy))
+        elif page.get("bypassed"):
+            status_txt = state.ui_font.render("Login in", True, (67, 160, 71))
+            sx = state.login_box_x + (state.login_box_w - status_txt.get_width()) // 2
+            sy = state.login_box_y - 42
+            state.screen.blit(status_txt, (sx, sy))
+    except Exception:
+        # Be defensive in drawing code — don't crash the whole UI if something odd happens
+        pass
+
 def draw_camera_version(state):
     """Draw version label below camera login box"""
     version_label = state.ui_font.render("Camera Web Interface v2.3.4", True, TEXT_COLOR)

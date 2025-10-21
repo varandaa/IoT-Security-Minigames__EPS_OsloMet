@@ -70,11 +70,11 @@ PATH = {
     ],
 
     "BruteForce" : [
-        "hydra", "medusa", "ncrack", "patator", "crowbar"
+        "hydra", "medusa", "ncrack", "patator", "crowbar", "combo-list.txt", "common-credentials.txt", "common-user-passwords.txt"
     ],
     
     "Wifi": [
-        "aircrack-ng", "reaver", "bully", "fern-wifi-cracker", "wifite", "nmcli"
+        "aircrack-ng", "reaver", "bully", "fern-wifi-cracker", "wifite"
     ]
 }
 
