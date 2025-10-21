@@ -85,6 +85,7 @@ connected_devices = [
     ("RealViewCamera-1", "192.168.1.102", "00:1B:44:11:3A:B7"),
     ("CozyHomePod", "192.168.1.114", "B8:27:EB:A3:2D:1F"),
     ("SafeSecureDoorLock", "192.168.1.223", "F0:18:98:6C:4E:2A"),
+    ("SmartLightHub", "192.168.1.150", "D4:3D:7E:4F:5A:6B")
 ]
 
 network_info = [
@@ -124,8 +125,7 @@ STAGE_ORDER = [
 DEVICE_STAGE_MAP = {
     "cam": 1,
     "camera": 1,
-    "iphone": 2,
-    "phone": 2,
+    "light": 2,
     "route": 0,
     "routesimple": 0,
 }
