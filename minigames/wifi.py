@@ -48,7 +48,9 @@ def on_wifi_crack_success(state, wifi_name: str):
     state.go_to_page_by_id("route_simple_login")
     dialog_handler.start_dialog(state, [
             f"Great! You've cracked the Wifi network '{wifi_name}'.",
-            "I send you to the router.",
+            "Now we're inside the home network."
+            "I sent you to the router's login page.",
             "From here, you can access the router's admin panel and take control of the network.",
-            "To do so, there is a folder called like the router, try to find the right exploit to hack it.",
+            "To do so, there is a folder with the same name as the router that contains exploits my Dark Web friends sent me.",
+            "Try to find the right exploit and run it to hack the router.",
         ], char_delay=20)

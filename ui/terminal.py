@@ -124,7 +124,7 @@ def get_help_dialog_for_page(state):
             "If you're still inside the 'Wifi' folder type 'cd ..' to go back to the 'devices' folder."
             "By typing 'ls' you can see folders for different devices and tools.",
             "This is a RouteSimple router - check the version in the browser.",
-            "Navigate to the RouteSimple folder: 'cd RouteSimple'",
+            "Navigate to the 'RouteSimple' folder: 'cd RouteSimple'",
             "Look for the exploit matching the router's version.",
             "Run it with './{exploit-name}' while in the RouteSimple folder.",
             "Once exploited, you'll bypass the login!",
@@ -144,7 +144,7 @@ def get_help_dialog_for_page(state):
             "This requires a brute force attack to crack the password.",
             "Navigate to my 'BruteForce' folder and take a look at the available wordlists.",
             "Try using the brute-force tool 'hydra' with the different wordlists until we get the right credentials",
-            "You can do so by typing 'hydra {wordlist_name}'.",
+            "You can do so by typing './hydra {wordlist_name}'.",
             "Be patient - you might have to try different wordlists to guess the credentials.",
         ]
     elif page_id == "camera_video" or camera_bypassed:
@@ -160,7 +160,7 @@ def get_help_dialog_for_page(state):
         # On WiFi networks page
         return [
             "You're viewing available WiFi networks.",
-            "John_Home_Wifi looks like the most interesting one, and it probably gelongs to this home.",
+            "John_Home_Wifi looks like the most interesting one, and it probably belongs to this home.",
             "My Wi-Fi cracking tools are in the 'Wifi' folder. My favourite one is 'fern-wifi-cracker'",
             "Run the command './fern-wifi-cracker {network_name}' while in the 'WiFi' folder to crack the WiFi!",
             "After that, we'll be able to connect to the WiFi and try to hack the devices inside."

@@ -114,7 +114,7 @@ class GameState:
             }
         ]
     # Start at the router login page so the flow begins with the router
-        self.go_to_page_by_id("route_simple_admin") # empty page at start
+        self.go_to_page_by_id("empty") # empty page at start
 
         # Clock
         self.clock = pygame.time.Clock()
@@ -213,7 +213,7 @@ class GameState:
     def first_dialog(self):
         dialog_handler.start_dialog(self, [
             "Hello there! Welcome to your hacking terminal.",
-            "Your goal is to hack into various IoT devices on this network and ultiamtely get into the house.",
+            "Your goal is to hack into various IoT devices on this network and ultimately get into the house.",
             "You can type 'help' to display a list of useful commands.",
             "Like 'ls' to list the contents of the folder you're in and 'cd' to go inside a different folder",
             "First you will need to get into the Wifi.",

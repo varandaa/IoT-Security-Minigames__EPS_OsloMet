@@ -4,6 +4,7 @@ from ui.terminal import draw_terminal
 from ui.browser import draw_browser
 import pygame
 import sys
+import random
 
 # Minigames
 from minigames import camera as camera_minigame
@@ -29,19 +30,53 @@ def wait(state, seconds):
                 handle_resize(state, e.w, e.h)
         time.sleep(0.01)
 
+
+def animate_bruteforce(state, total=1000, duration=3.0, prefix="Trying"):
+    if total <= 0:
+        return
+
+    # Create a placeholder progress line and remember its index
+    state.output_lines.append(f"{prefix} 0/{total} (0%)")
+    progress_idx = len(state.output_lines) - 1
+
+    interval = float(duration) / float(total)
+    # Defensive minimum sleep to avoid too tight loops
+    interval = max(0.001, interval)
+
+    i = 0
+    try:
+        while i <= total:
+            percent = int((i / total) * 100)
+            state.output_lines[progress_idx] = f"{prefix} {i}/{total} ({percent}%)"
+
+            # draw and process events so UI stays responsive
+            draw_terminal(state)
+            draw_browser(state)
+            pygame.display.flip()
+
+            for e in pygame.event.get():
+                if e.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif e.type == pygame.VIDEORESIZE:
+                    from handlers.resize_handler import handle_resize
+                    handle_resize(state, e.w, e.h)
+
+            time.sleep(interval)
+            i += 1
+    finally:
+        # Ensure the progress flag is cleared if present
+        try:
+            state.current_page["is_being_brute_forced"] = False
+        except Exception:
+            pass
+
 def execute_command(state, cmd):
     """Execute terminal command"""
     cmd = cmd.strip()
     
     if cmd == "help":
         show_help(state)
-    elif cmd == "dialogtest":
-        # Demo dialog sequence using dialog handler
-        dialog_handler.start_dialog(state, [
-            "Hey there — it's Clippy. I'm watching your network traffic.",
-            "If you compromise the router, you'll be able to jump to devices directly.",
-            "Press Enter to skip through the dialog."
-        ], char_delay=20)
     elif cmd == 'ls':
         list_files(state)
     elif cmd.split(" ")[0] == "cd":
@@ -145,7 +180,9 @@ def run_exploit(state, exploit_cmd):
                     wait(state, 2)
 
                     state.output_lines.append("[+]Starting brute force attack using " + exploit + "...")
-                    wait(state, 3)
+
+                    # Animate trying combinations (1000 by default over ~3s)
+                    animate_bruteforce(state, total=random.randint(1000,1500), duration=3.0, prefix="Trying credentials:")
                     
                     if wordlist != "common-credentials.txt":
                         dialog_handler.start_dialog(state, [
@@ -162,7 +199,8 @@ def run_exploit(state, exploit_cmd):
                         f"{exploit} is not effective against this device.",
                         "You should try using 'hydra' to brute force the camera login.",
                         "With some wordlists, it should be possible to get in.",
-                        "Try ./hydra <wordlist> that you can find in the 'BruteForce' folder."
+                        "Try ./hydra <wordlist>.",
+                        "You can find it in the 'BruteForce' folder."
                     ], char_delay=20)
                     state.output_lines.append(f"[-]{exploit} is not effective against this device.")
         elif state.current_folder == "/devices/Wifi":
