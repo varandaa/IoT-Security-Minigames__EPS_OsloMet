@@ -111,10 +111,21 @@ class GameState:
                 "bypass_time": 0,
                 "username": "",
                 "password": ""
+            },
+            {
+                "id": "smart_fridge",
+                "url": "http://192.168.1.150/",
+                "bypassed": True,  # Already logged in
+                "login_failed": False,
+                "show_admin_panel": False,
+                "bypass_time": 0,
+                "username": "user",
+                "password": "",
+                "logo_path": "./assets/giggle-logo.png"
             }
         ]
     # Start at the router login page so the flow begins with the router
-        self.go_to_page_by_id("empty") # empty page at start
+        self.go_to_page_by_id("smart_fridge") # empty page at start
 
         # Clock
         self.clock = pygame.time.Clock()

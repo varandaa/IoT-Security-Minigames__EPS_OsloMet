@@ -1,4 +1,5 @@
 import pygame
+from datetime import datetime, timedelta
 from config import (BROWSER_BG, TOPBAR_BG, TEXT_COLOR, FIELD_BG, 
                    FIELD_BORDER, BUTTON_BG, BUTTON_TEXT, BYPASS_ALERT_BG,
                     FAILED_ALERT_BG, connected_devices, network_info)
@@ -52,6 +53,9 @@ def draw_browser(state):
     elif page["id"] == "wifi_networks":
         draw_topbar(state, page["url"])
         draw_wifi_networks(state)
+    elif page["id"] == "smart_fridge":
+        draw_topbar(state, page["url"])
+        draw_smart_fridge(state)
     else:
         # Unknown page: show blank or error
         draw_topbar(state, page["url"])
@@ -478,3 +482,145 @@ def draw_wifi_networks(state):
         state.screen.blit(security_render, (state.browser_rect.x + padding + 300, y))
         
         y += ssid_render.get_height() + 20
+
+def draw_smart_fridge(state):
+    """Draw the smart fridge page with Giggle branding and food inventory."""
+    padding = 40
+    y = state.browser_rect.y + 80
+    
+    # Header with Giggle logo
+    try:
+        giggle_logo = pygame.image.load("./assets/giggle-logo.png").convert_alpha()
+        logo_height = 60
+        scale = logo_height / giggle_logo.get_height()
+        giggle_logo = pygame.transform.smoothscale(
+            giggle_logo,
+            (int(giggle_logo.get_width() * scale), logo_height)
+        )
+        logo_x = state.browser_rect.x + padding
+        state.screen.blit(giggle_logo, (logo_x, y))
+    except Exception:
+        pass  # Skip logo if not found
+    
+    # Title next to logo
+    title = state.title_font.render("Smart Fridge", True, TEXT_COLOR)
+    state.screen.blit(title, (state.browser_rect.x + padding + 200, y + 10))
+    
+    y += 80
+    
+    # "Logged in with Giggle" status
+    login_status = state.ui_font.render("Logged in with Giggle", True, (67, 160, 71))
+    state.screen.blit(login_status, (state.browser_rect.x + padding, y))
+    
+    y += 40
+    
+    # Divider line
+    pygame.draw.line(state.screen, (220, 220, 220),
+                     (state.browser_rect.x + padding, y),
+                     (state.browser_rect.right - padding, y), 1)
+    
+    y += 30
+    
+    # Fridge icon
+    try:
+        fridge_icon = pygame.image.load("./assets/smart-fridge-icon.png").convert_alpha()
+        icon_width = 120
+        scale = icon_width / fridge_icon.get_width()
+        fridge_icon = pygame.transform.smoothscale(
+            fridge_icon,
+            (int(fridge_icon.get_width() * scale), int(fridge_icon.get_height() * scale))
+        )
+        icon_x = state.browser_rect.x + padding
+        state.screen.blit(fridge_icon, (icon_x, y))
+    except Exception:
+        pass  # Skip icon if not found
+    
+    # Food inventory section (to the right of the fridge icon)
+    inventory_x = state.browser_rect.x + padding + 180
+    inventory_y = y
+    
+    section_title = state.title_font.render("Food Inventory", True, TEXT_COLOR)
+    state.screen.blit(section_title, (inventory_x, inventory_y))
+    
+    inventory_y += 50
+    
+    # Define food items with quantities and expiration info (dynamic dates)
+    today = datetime.now()
+    
+    def format_expiry(days_offset):
+        """Format expiration date with offset from today"""
+        if days_offset is None:
+            return "No expiry"
+        expiry_date = today + timedelta(days=days_offset)
+        return f"Expires: {expiry_date.strftime('%b %d')}"
+    
+    food_items = [
+        ("Milk", "2 bottles", format_expiry(2)),           # Expires in 2 days
+        ("Cheese", "1 block", format_expiry(10)),          # Expires in 10 days
+        ("Apples", "6 pieces", "Fresh"),
+        ("Carrots", "1 bag", "Fresh"),
+        ("Chicken", "500g", format_expiry(1)),             # Expires in 1 day
+        ("Leftover Pizza", "3 slices", format_expiry(0)),  # Expires today
+        ("Orange Juice", "1 carton", format_expiry(3)),    # Expires in 3 days
+        ("Chocolate", "2 bars", format_expiry(None)),      # No expiry
+        ("Eggs", "12 count", format_expiry(5)),            # Expires in 5 days
+        ("Butter", "250g", format_expiry(13)),             # Expires in 13 days
+    ]
+    
+    # Create a neat table-like display with colored bullets
+    for item_name, quantity, expiry in food_items:
+        # Draw a colored bullet point/circle
+        bullet_color = (67, 160, 71)  # Green for fresh items
+        
+        # Determine color based on expiry date proximity
+        if "Expires" in expiry:
+            try:
+                # Extract the date from the expiry string
+                expiry_str = expiry.replace("Expires: ", "")
+                expiry_date = datetime.strptime(f"{expiry_str} {today.year}", "%b %d %Y")
+                days_until_expiry = (expiry_date - today).days
+                
+                if days_until_expiry <= 1:
+                    bullet_color = (239, 83, 80)  # Red for expiring today or tomorrow
+                elif days_until_expiry <= 5:
+                    bullet_color = (255, 193, 7)  # Amber for expiring within 5 days
+                # else: stays green
+            except Exception:
+                pass  # Keep default green if parsing fails
+        
+        pygame.draw.circle(state.screen, bullet_color, 
+                         (inventory_x - 15, inventory_y + 10), 5)
+        
+        # Item name (bold-ish by using title font at smaller size or regular font)
+        item_render = state.ui_font.render(item_name, True, TEXT_COLOR)
+        state.screen.blit(item_render, (inventory_x, inventory_y))
+        
+        # Quantity
+        qty_render = state.ui_font.render(quantity, True, (100, 100, 100))
+        state.screen.blit(qty_render, (inventory_x + 200, inventory_y))
+        
+        # Expiration info with dynamic color
+        expiry_color = TEXT_COLOR
+        if "Expires" in expiry:
+            try:
+                # Extract the date from the expiry string
+                expiry_str = expiry.replace("Expires: ", "")
+                expiry_date = datetime.strptime(f"{expiry_str} {today.year}", "%b %d %Y")
+                days_until_expiry = (expiry_date - today).days
+                
+                if days_until_expiry <= 1:
+                    expiry_color = (239, 83, 80)  # Red for expiring today or tomorrow
+                elif days_until_expiry <= 5:
+                    expiry_color = (255, 152, 0)  # Orange for expiring within 5 days
+            except Exception:
+                pass  # Keep default color if parsing fails
+        
+        expiry_render = state.ui_font.render(expiry, True, expiry_color)
+        state.screen.blit(expiry_render, (inventory_x + 340, inventory_y))
+        
+        inventory_y += 30
+    
+    # Temperature display at the bottom
+    inventory_y += 20
+    temp_text = state.ui_font.render("Temperature: 4°C | Humidity: 65%", True, (150, 150, 150))
+    state.screen.blit(temp_text, (state.browser_rect.x + padding, inventory_y))

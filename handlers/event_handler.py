@@ -130,13 +130,15 @@ def handle_mouse(state, event):
                             # blocked: show dialog explaining the order
                             dialog_handler.start_dialog(state, [
                                 f"You can't access {dev_name} yet.",
-                                "You need to progress in the network in order. Try the required devices first."
+                                "Let's stick to the plan, access the devices in the right order."
                             ], char_delay=20)
                             return
 
                         # Allowed: perform navigation
                         if "cam" in dev_name.lower() or "camera" in dev_name.lower():
                             state.go_to_page_by_id("camera_login")  # camera login page
+                        elif "fridge" in dev_name.lower() or "giggle" in dev_name.lower():
+                            state.go_to_page_by_id("smart_fridge")  # smart fridge page
                         # command_handler.change_directory(state, "cd ..")
                         else:
                             # For other devices, create a new page entry and go there

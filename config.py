@@ -83,9 +83,10 @@ CORRECT_EXPLOIT="exploit-1.0.1u"
 connected_devices = [
     ("iPhone-John", "192.168.1.75", "A4:83:E7:2F:11:8C"),
     ("RealViewCamera-1", "192.168.1.102", "00:1B:44:11:3A:B7"),
-    ("CozyHomePod", "192.168.1.114", "B8:27:EB:A3:2D:1F"),
+    ("Giggle-SmartFridge", "192.168.1.150", "E8:4F:25:9A:1C:3D"),
+    ("Giggle-HomePod", "192.168.1.114", "B8:27:EB:A3:2D:1F"),
     ("SafeSecureDoorLock", "192.168.1.223", "F0:18:98:6C:4E:2A"),
-    ("SmartLightHub", "192.168.1.150", "D4:3D:7E:4F:5A:6B")
+    ("SmartLightHub", "192.168.1.180", "D4:3D:7E:4F:5A:6B")
 ]
 
 network_info = [
