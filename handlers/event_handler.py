@@ -96,7 +96,7 @@ def handle_mouse(state, event):
         dialog_handler.start_dialog(state, help_text, char_delay=20)
         return
 
-    connection_pages = [ "route_simple_login", "camera_login" ]  # id of pages that can connect to others
+    connection_pages = [ "route_simple_login", "camera_login", "smart_light_login" ]  # id of pages that can connect to others
 
     page = state.current_page
     if state.browser_rect.collidepoint((mx, my)):
@@ -140,6 +140,20 @@ def handle_mouse(state, event):
                         elif "fridge" in dev_name.lower() or "giggle" in dev_name.lower():
                             state.go_to_page_by_id("smart_fridge")  # smart fridge page
                         # command_handler.change_directory(state, "cd ..")
+                        elif "light" in dev_name.lower() or "lamp" in dev_name.lower():
+                            state.go_to_page_by_id("smart_light_login")  # smart light hub page
+                            page = state.current_page
+                            if page.get("bypassed", False):
+                                # If already bypassed, go to admin panel directly
+                                state.go_to_page_by_id("smart_light_admin")
+                            else:
+                                dialog_handler.start_dialog(state, [
+                                    f"We've reached the smart light hub login page.",
+                                    "Let's try to bypass its login to access the admin panel.",
+                                    "The user often uses the same password multiple times.",
+                                    "Maybe we can use the password we found for the camera ?",
+                                    "It's on the terminal history if you need to check."
+                                ], char_delay=20)
                         else:
                             # For other devices, create a new page entry and go there
                             new_url = f"http://{item['ip']}/"
@@ -165,6 +179,17 @@ def handle_mouse(state, event):
                                 "Know the time they wake up...",
                                 "The time they leave for work..."
                             ], char_delay=20)
+        # Smart Light admin: handle Back to RouteSimple button
+        elif page.get("id") == "smart_light_admin":
+            back_rect = getattr(state, "smart_light_back_button_rect", None)
+            if back_rect and back_rect.collidepoint(event.pos):
+                # Navigate back to RouteSimple admin
+                state.go_to_page_by_id("route_simple_admin")
+                dialog_handler.start_dialog(state, [
+                    "Returned to the RouteSimple admin panel.",
+                    "You can continue exploring connected devices from there."
+                ], char_delay=20)
+                return
     elif state.terminal_rect.collidepoint((mx, my)):
             state.browser_focus = None
 

@@ -1,6 +1,6 @@
 import pygame
 import os
-from config import BLACK, GREEN, BORDER
+from config import BLACK, GREEN, BORDER, USERNAME_LIGHT, PASSWORD_LIGHT
 
 # Load Clippy image
 _clippy_image = None
@@ -164,6 +164,22 @@ def get_help_dialog_for_page(state):
             "My Wi-Fi cracking tools are in the 'Wifi' folder. My favourite one is 'fern-wifi-cracker'",
             "Run the command './fern-wifi-cracker {network_name}' while in the 'WiFi' folder to crack the WiFi!",
             "After that, we'll be able to connect to the WiFi and try to hack the devices inside."
+        ]
+    elif page_id == "smart_light_login":
+        # On smart light hub login page
+        return [
+            "This is the smart light hub login page.",
+            "We can try to use the same password we found for the camera to bypass this login.",
+            "I remember the credentials are :",
+            f"Username: {USERNAME_LIGHT} | Password: {PASSWORD_LIGHT}",
+        ]
+    elif page_id == "smart_light_admin":
+        # Smart light admin panel
+        return [
+            "Fantastic! We've accessed the smart light hub.",
+            "From here, we can see the schedule of when the lights turn on and off.",
+            "This information can help us understand the residents' routines.",
+            "Let's continue exploring other devices on the network by going back to the router admin panel.",
         ]
     else:
         # Generic help for other pages

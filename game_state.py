@@ -113,6 +113,58 @@ class GameState:
                 "password": ""
             },
             {
+                "id": "smart_light_login",
+                "url": "http://192.168.1.151/",
+                "bypassed": False,
+                "login_failed": False,
+                "bypass_time": 0,
+                "username": "",
+                "password": "",
+                "logo_path": "./assets/smart_light_hub.png"
+            },
+            {
+                "id": "smart_light_admin",
+                "url": "http://192.168.1.151/admin",
+                "bypassed": False,
+                "login_failed": False,
+                "show_admin_panel": False,
+                "bypass_time": 0,
+                "username": "",
+                "password": "",
+                # light-specific state
+                "is_on": False,
+                "brightness": 75,
+                # weekly schedule: list of segments per day; each segment is dict with start,end (hour), color (r,g,b), intensity (0-100)
+                "weekly_schedule": {
+                    "Mon": [
+                        {"start": 7, "end": 9, "color": (255, 244, 229), "intensity": 90},
+                        {"start": 18, "end": 23, "color": (255, 200, 160), "intensity": 70}
+                    ],
+                    "Tue": [
+                        {"start": 7, "end": 9, "color": (255, 244, 229), "intensity": 90},
+                        {"start": 18, "end": 23, "color": (255, 200, 160), "intensity": 70}
+                    ],
+                    "Wed": [
+                        {"start": 7, "end": 9, "color": (255, 244, 229), "intensity": 90},
+                        {"start": 18, "end": 23, "color": (255, 200, 160), "intensity": 70}
+                    ],
+                    "Thu": [
+                        {"start": 7, "end": 9, "color": (255, 244, 229), "intensity": 90},
+                        {"start": 18, "end": 23, "color": (255, 200, 160), "intensity": 70}
+                    ],
+                    "Fri": [
+                        {"start": 7, "end": 10, "color": (255, 244, 229), "intensity": 95},
+                        {"start": 17, "end": 24, "color": (255, 215, 160), "intensity": 80}
+                    ],
+                    "Sat": [
+                        {"start": 9, "end": 23, "color": (200, 230, 255), "intensity": 80}
+                    ],
+                    "Sun": [
+                        {"start": 9, "end": 22, "color": (255, 230, 240), "intensity": 70}
+                    ]
+                }
+            },
+            {
                 "id": "smart_fridge",
                 "url": "http://192.168.1.150/",
                 "bypassed": True,  # Already logged in
@@ -125,14 +177,14 @@ class GameState:
             }
         ]
     # Start at the router login page so the flow begins with the router
-        self.go_to_page_by_id("smart_fridge") # empty page at start
+        self.go_to_page_by_id("smart_light_admin") # empty page at start
 
         # Clock
         self.clock = pygame.time.Clock()
 
         # Progression: which stage the player has reached (index into config.STAGE_ORDER)
         # Start at -1 (nothing hacked). When they bypass router, set to 0.
-        self.current_stage_index = 0
+        self.current_stage_index = 2
         
         # Fonts
         self.mono_font = None
@@ -155,7 +207,8 @@ class GameState:
         # Initialize layout
         from ui.layout import update_layout
         update_layout(self)
-        self.first_dialog()
+        if self.current_stage_index == -1:
+            self.first_dialog()
 
     # Property to access the current page's data
     @property
@@ -196,7 +249,7 @@ class GameState:
             "username": "",
             "password": ""
         })
-    
+
     def update_cursors(self, dt):
         """Update cursor blink timers (global and current page)"""
         self.cursor_timer += dt

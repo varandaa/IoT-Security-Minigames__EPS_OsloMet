@@ -129,4 +129,8 @@ DEVICE_STAGE_MAP = {
     "light": 2,
     "route": 0,
     "routesimple": 0,
+    "fridge": 3,
 }
+
+USERNAME_LIGHT = "john"
+PASSWORD_LIGHT = "Winter2001!"

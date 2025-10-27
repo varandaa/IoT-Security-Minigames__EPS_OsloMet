@@ -53,6 +53,16 @@ def draw_browser(state):
     elif page["id"] == "wifi_networks":
         draw_topbar(state, page["url"])
         draw_wifi_networks(state)
+    elif page["id"] == "smart_light_login":
+        draw_topbar(state, page["url"])
+        draw_smart_light_login(state)
+        # show login feedback (reuse draw_alert)
+        if page["bypassed"] or page["login_failed"]:
+            draw_alert(state, page["bypassed"])
+        draw_field_cursor(state)
+    elif page["id"] == "smart_light_admin":
+        draw_topbar(state, page["url"])
+        draw_smart_light_admin(state)
     elif page["id"] == "smart_fridge":
         draw_topbar(state, page["url"])
         draw_smart_fridge(state)
@@ -624,3 +634,123 @@ def draw_smart_fridge(state):
     inventory_y += 20
     temp_text = state.ui_font.render("Temperature: 4°C | Humidity: 65%", True, (150, 150, 150))
     state.screen.blit(temp_text, (state.browser_rect.x + padding, inventory_y))
+
+def draw_smart_light_login(state):
+    """Draw a simple smart light hub login page."""
+    padding = 40
+    title = state.title_font.render("Giggle Light Hub", True, TEXT_COLOR)
+    state.screen.blit(title, (state.browser_rect.x + padding, state.browser_rect.y + 80))
+
+    # Draw a small logo if available
+    try:
+        logo = pygame.image.load(state.current_page.get("logo_path", "./assets/smart_light_hub.png")).convert_alpha()
+        logo_w = 120
+        scale = logo_w / logo.get_width()
+        logo_s = pygame.transform.smoothscale(logo, (logo_w, int(logo.get_height() * scale)))
+        lx = state.browser_rect.x + state.browser_rect.width - logo_w - padding
+        ly = state.browser_rect.y + 70
+        state.screen.blit(logo_s, (lx, ly))
+    except Exception:
+        pass
+
+    # Use the existing login box layout
+    draw_login_box(state)
+    # place username/password fields and button in the center of the login box area
+    # We'll reuse state.username_rect/state.password_rect/state.login_button_rect which are set by layout
+    draw_fields(state)
+
+    # Hint text
+    hint = state.ui_font.render("Login to control the light hub.", True, (120, 120, 120))
+    hx = state.login_box_x + (state.login_box_w - hint.get_width()) // 2
+    hy = state.login_box_y + state.login_box_h + 10
+    state.screen.blit(hint, (hx, hy))
+
+def draw_smart_light_admin(state):
+    """Draw a simple admin panel for the smart light hub."""
+    padding = 40
+    start_y = state.browser_rect.y + 140
+
+    title = state.title_font.render("Light Hub — Admin", True, TEXT_COLOR)
+    state.screen.blit(title, (state.browser_rect.x + padding, start_y))
+
+    # Back button to RouteSimple admin (stored on state for click handling)
+    btn_w = 180
+    btn_h = 36
+    bx = state.browser_rect.right - padding - btn_w
+    by = start_y
+    back_btn_rect = pygame.Rect(bx, by, btn_w, btn_h)
+    pygame.draw.rect(state.screen, BUTTON_BG, back_btn_rect, border_radius=6)
+    pygame.draw.rect(state.screen, (120, 120, 120), back_btn_rect, 1, border_radius=6)
+    back_text = state.ui_font.render("Back to RouteSimple", True, BUTTON_TEXT)
+    tx = back_btn_rect.x + (back_btn_rect.width - back_text.get_width()) // 2
+    ty = back_btn_rect.y + (back_btn_rect.height - back_text.get_height()) // 2
+    state.screen.blit(back_text, (tx, ty))
+    # expose rect so event handler can detect clicks
+    state.smart_light_back_button_rect = back_btn_rect
+
+    y = start_y + 50
+
+    # Read state from page
+    page = state.current_page
+    # Read schedule structure
+    weekly = page.get("weekly_schedule", {})
+
+    # Draw a compact hourly visualization for each day
+    days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    hour_w = max(4, (state.browser_rect.width - padding * 2) // 28)  # leave space for labels
+    chart_x = state.browser_rect.x + padding + 120
+    chart_width = hour_w * 24
+
+    # Title for chart
+    chart_title = state.ui_font.render("Weekly Schedule (hours) — color & intensity", True, (120,120,120))
+    state.screen.blit(chart_title, (chart_x, y - 30))
+
+    for di, day in enumerate(days):
+        row_y = y + di * 28
+        # day label
+        day_label = state.ui_font.render(day, True, TEXT_COLOR)
+        state.screen.blit(day_label, (state.browser_rect.x + padding, row_y))
+
+        # Draw 24 hour blocks
+        for h in range(24):
+            bx = chart_x + h * hour_w
+            by = row_y
+            # Default background for hour (off) — slightly darker for contrast
+            bg = (210, 210, 210)
+            pygame.draw.rect(state.screen, bg, (bx, by, hour_w - 1, 20))
+            # subtle separator to increase legibility
+            sep_color = (190, 190, 190)
+            pygame.draw.rect(state.screen, sep_color, (bx, by, hour_w - 1, 20), 1)
+
+        # Fill colored segments from schedule
+        segments = weekly.get(day, [])
+        for seg in segments:
+            s = int(seg.get("start", 0))
+            e = int(seg.get("end", 0))
+            color = seg.get("color", (255,255,255))
+            intensity = seg.get("intensity", 100) / 100.0
+            for hour in range(s, min(e, 24)):
+                bx = chart_x + hour * hour_w
+                by = row_y
+                # produce a more contrasted color by blending toward a darker base
+                base_dark = 100
+                r = int(color[0] * intensity + base_dark * (1 - intensity))
+                g = int(color[1] * intensity + base_dark * (1 - intensity))
+                b = int(color[2] * intensity + base_dark * (1 - intensity))
+                pygame.draw.rect(state.screen, (r, g, b), (bx, by, hour_w - 1, 20))
+
+        # (Per-row hour ticks removed to reduce clutter; we'll draw shared ticks below)
+
+    # Draw legend area at bottom
+    # Draw a single set of hour ticks/labels below the chart (shared for all days)
+    ticks_y = y + len(days) * 28 + 6
+    tick_color = (80, 80, 80)
+    for hh in range(0, 24, 6):
+        tx = chart_x + hh * hour_w
+        tick = state.ui_font.render(str(hh), True, tick_color)
+        # center label under the tick
+        state.screen.blit(tick, (tx - tick.get_width() // 2, ticks_y))
+
+    legend_y = ticks_y + 30
+    legend_label = state.ui_font.render("Legend: color shows hue, brightness reflects intensity", True, (100,100,100))
+    state.screen.blit(legend_label, (state.browser_rect.x + padding, legend_y))

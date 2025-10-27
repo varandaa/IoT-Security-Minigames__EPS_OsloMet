@@ -6,6 +6,7 @@ Provides:
 """
 import cv2
 from handlers import dialog_handler
+from config import USERNAME_LIGHT, PASSWORD_LIGHT
 
 # OpenCV camera setup used by camera minigame
 cap = cv2.VideoCapture(0)
@@ -15,7 +16,7 @@ if not cap.isOpened():
 def on_bruteforce_success(state, exploit_name: str):
     """Handle state updates when brute force succeeds on the camera."""
     state.output_lines.append("[+]Brute force successful! The camera login has been bypassed!")
-    state.output_lines.append("[+]The credentials are: Username: john | Password: Winter2001!")
+    state.output_lines.append(f"[+]The credentials are: Username: {USERNAME_LIGHT} | Password: {PASSWORD_LIGHT}")
     state.current_page["bypassed"] = True
     # switch to camera video page
     state.go_to_page_by_id("camera_video")
