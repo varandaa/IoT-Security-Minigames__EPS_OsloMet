@@ -60,9 +60,18 @@ def draw_browser(state):
         if page["bypassed"] or page["login_failed"]:
             draw_alert(state, page["bypassed"])
         draw_field_cursor(state)
+    elif page["id"] == "giggle_login":
+        draw_topbar(state, page["url"])
+        draw_giggle_login(state)
+        if page["bypassed"] or page["login_failed"]:
+            draw_alert(state, page["bypassed"])
+        draw_field_cursor(state)
     elif page["id"] == "smart_light_admin":
         draw_topbar(state, page["url"])
         draw_smart_light_admin(state)
+    elif page["id"] == "giggle_admin":
+        draw_topbar(state, page["url"])
+        draw_giggle_admin(state)
     elif page["id"] == "smart_fridge":
         draw_topbar(state, page["url"])
         draw_smart_fridge(state)
@@ -754,3 +763,64 @@ def draw_smart_light_admin(state):
     legend_y = ticks_y + 30
     legend_label = state.ui_font.render("Legend: color shows hue, brightness reflects intensity", True, (100,100,100))
     state.screen.blit(legend_label, (state.browser_rect.x + padding, legend_y))
+
+
+def draw_giggle_login(state):
+    """Draw Giggle HomePod login page (reuses generic login fields)."""
+    padding = 40
+    title = state.title_font.render("Giggle HomePod", True, TEXT_COLOR)
+    state.screen.blit(title, (state.browser_rect.x + padding, state.browser_rect.y + 80))
+
+    # Draw Giggle logo if available
+    try:
+        logo = pygame.image.load(state.current_page.get("logo_path", "./assets/giggle-logo.png")).convert_alpha()
+        logo_w = 120
+        scale = logo_w / logo.get_width()
+        logo_s = pygame.transform.smoothscale(logo, (logo_w, int(logo.get_height() * scale)))
+        lx = state.browser_rect.x + state.browser_rect.width - logo_w - padding
+        ly = state.browser_rect.y + 70
+        state.screen.blit(logo_s, (lx, ly))
+    except Exception:
+        pass
+
+    draw_login_box(state)
+    draw_fields(state)
+
+    # Hint text for Giggle
+    hint = state.ui_font.render("Login to manage your Giggle HomePod.", True, (120, 120, 120))
+    hx = state.login_box_x + (state.login_box_w - hint.get_width()) // 2
+    hy = state.login_box_y + state.login_box_h + 10
+    state.screen.blit(hint, (hx, hy))
+
+
+def draw_giggle_admin(state):
+    """Draw a simple admin panel for the Giggle HomePod."""
+    padding = 40
+    start_y = state.browser_rect.y + 140
+
+    title = state.title_font.render("Giggle HomePod — Admin", True, TEXT_COLOR)
+    state.screen.blit(title, (state.browser_rect.x + padding, start_y))
+
+    # Small status box
+    y = start_y + 50
+    status_label = state.ui_font.render("Status:", True, (100, 100, 100))
+    status_value = state.ui_font.render("Online", True, (67, 160, 71))
+    state.screen.blit(status_label, (state.browser_rect.x + padding, y))
+    state.screen.blit(status_value, (state.browser_rect.x + padding + 100, y))
+
+    y += 36
+    # Volume / playback mock settings
+    vol_label = state.ui_font.render("Volume:", True, (100, 100, 100))
+    vol_value = state.ui_font.render("72%", True, TEXT_COLOR)
+    state.screen.blit(vol_label, (state.browser_rect.x + padding, y))
+    state.screen.blit(vol_value, (state.browser_rect.x + padding + 100, y))
+
+    y += 36
+    firmware = state.ui_font.render("Firmware: v3.2.0 | Uptime: 6 days, 4 hours", True, (140, 140, 140))
+    state.screen.blit(firmware, (state.browser_rect.x + padding, y))
+
+    # Optionally expose a rect for a back button if handlers want it (not required)
+    # Provide a small action hint
+    y += 48
+    hint = state.ui_font.render("Use the admin controls to manage playback and settings.", True, (120,120,120))
+    state.screen.blit(hint, (state.browser_rect.x + padding, y))

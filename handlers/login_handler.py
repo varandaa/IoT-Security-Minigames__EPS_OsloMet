@@ -1,4 +1,4 @@
-from config import USERNAME_LIGHT, PASSWORD_LIGHT
+from config import USERNAME_LIGHT, PASSWORD_LIGHT, USERNAME_GIGGLE, PASSWORD_GIGGLE
 from handlers import dialog_handler
 
 def login_attempt(state):
@@ -16,7 +16,6 @@ def login_attempt(state):
         if username == USERNAME_LIGHT and password == PASSWORD_LIGHT:
             page["bypassed"] = True
             page["login_failed"] = False
-            page["bypass_time"] = __import__("pygame").time.get_ticks()
             # navigate to admin panel
             state.go_to_page_by_id("smart_light_admin")
             dialog_handler.start_dialog(state, [
@@ -27,6 +26,23 @@ def login_attempt(state):
                 "It's on the terminal history if you need to check."
             ], char_delay=20)
             state.current_stage_index = max(state.current_stage_index, 4)
+            return True
+        else:
+            page["login_failed"] = True
+            return False
+
+    # Giggle HomePod login: check against Giggle credentials in config
+    if page.get("id") == "giggle_login":
+        if username == USERNAME_GIGGLE and password == PASSWORD_GIGGLE:
+            page["bypassed"] = True
+            page["login_failed"] = False
+            state.go_to_page_by_id("giggle_admin")
+            dialog_handler.start_dialog(state, [
+                "Successful login to Giggle HomePod.",
+                "Accessing Giggle admin panel now."
+            ], char_delay=20)
+            # promote progression a bit (arbitrary stage)
+            state.current_stage_index = max(state.current_stage_index, 3)
             return True
         else:
             page["login_failed"] = True

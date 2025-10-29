@@ -96,7 +96,7 @@ def handle_mouse(state, event):
         dialog_handler.start_dialog(state, help_text, char_delay=20)
         return
 
-    connection_pages = [ "route_simple_login", "camera_login", "smart_light_login" ]  # id of pages that can connect to others
+    connection_pages = [ "route_simple_login", "camera_login", "smart_light_login", "giggle_login" ]  # id of pages that can connect to others
 
     page = state.current_page
     if state.browser_rect.collidepoint((mx, my)):

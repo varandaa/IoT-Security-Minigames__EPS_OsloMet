@@ -165,6 +165,27 @@ class GameState:
                 }
             },
             {
+                "id": "giggle_login",
+                "url": "http://192.168.1.114/login",
+                "bypassed": False,
+                "login_failed": False,
+                "show_admin_panel": False,
+                "bypass_time": 0,
+                "username": "",
+                "password": "",
+                "logo_path": "./assets/giggle-logo.png"
+            },
+            {
+                "id": "giggle_admin",
+                "url": "http://192.168.1.114/admin",
+                "bypassed": False,
+                "login_failed": False,
+                "show_admin_panel": True,
+                "bypass_time": 0,
+                "username": "",
+                "password": ""
+            },
+            {
                 "id": "smart_fridge",
                 "url": "http://192.168.1.150/",
                 "bypassed": True,  # Already logged in
@@ -177,7 +198,7 @@ class GameState:
             }
         ]
     # Start at the router login page so the flow begins with the router
-        self.go_to_page_by_id("smart_light_admin") # empty page at start
+        self.go_to_page_by_id("giggle_login") # empty page at start
 
         # Clock
         self.clock = pygame.time.Clock()
