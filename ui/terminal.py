@@ -47,7 +47,10 @@ def draw_terminal(state):
         prompt += "_"
     rendered_input = state.mono_font.render(prompt, True, GREEN)
     state.screen.blit(rendered_input, (state.terminal_rect.x + 10, y))
-    
+    # If packet inspector is active, draw it over the terminal area
+    if getattr(state, 'packet_inspector', None) and state.packet_inspector.get('visible'):
+        draw_packet_inspector(state)
+
     # Draw Clippy icon in the top-right corner of the terminal
     global _clippy_image, _clippy_rect
     _load_clippy()
@@ -80,6 +83,61 @@ def draw_terminal(state):
         
         # Store the rect in state for click detection
         state.clippy_rect = _clippy_rect
+
+
+def draw_packet_inspector(state):
+    """Draw a simple packet inspector UI inside the terminal pane."""
+    inspector = state.packet_inspector
+    if not inspector:
+        return
+
+    tr = state.terminal_rect
+    # Inspector box (slightly inset)
+    pad = 12
+    box = pygame.Rect(tr.x + pad, tr.y + pad, tr.width - pad * 2, tr.height - pad * 2)
+    pygame.draw.rect(state.screen, (18, 18, 18), box, border_radius=6)
+    pygame.draw.rect(state.screen, (90, 90, 90), box, 2, border_radius=6)
+
+    # Header
+    header_h = 36
+    header_rect = pygame.Rect(box.x, box.y, box.width, header_h)
+    title = state.ui_font.render("Packet Inspector — wireshark", True, (220, 220, 220))
+    state.screen.blit(title, (header_rect.x + 10, header_rect.y + 6))
+
+    # Close button
+    close_w = 72
+    close_h = 24
+    close_rect = pygame.Rect(box.right - close_w - 10, header_rect.y + 6, close_w, close_h)
+    pygame.draw.rect(state.screen, (150, 50, 50), close_rect, border_radius=6)
+    close_txt = state.ui_font.render("Close [ESC]", True, (255, 255, 255))
+    state.screen.blit(close_txt, (close_rect.x + 8, close_rect.y + 3))
+    inspector['close_rect'] = close_rect
+
+    # Packet list area
+    list_x = box.x + 10
+    list_y = header_rect.y + header_h + 8
+    line_h = state.ui_font.get_height() + 6
+
+    inspector['packet_rects'] = []
+    for i, pkt in enumerate(inspector.get('packets', [])):
+        row_y = list_y + i * line_h
+        # Background hover if mouse over
+        row_rect = pygame.Rect(list_x, row_y, box.width - 20, line_h - 4)
+        mouse_pos = pygame.mouse.get_pos()
+        if row_rect.collidepoint(mouse_pos):
+            pygame.draw.rect(state.screen, (30, 30, 30), row_rect)
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+
+        # Render packet summary
+        summary = f"{pkt['time']}  {pkt['src']} -> {pkt['dst']}  {pkt['proto']}  {pkt['len']}B  {pkt['summary']}"
+        txt = state.ui_font.render(summary, True, (200, 200, 200))
+        state.screen.blit(txt, (row_rect.x + 6, row_rect.y + 2))
+
+        inspector['packet_rects'].append({'rect': row_rect, 'packet': pkt})
+
+    # Hint at bottom
+    hint = state.ui_font.render("Click a packet to inspect payload", True, (160, 160, 160))
+    state.screen.blit(hint, (box.x + 12, box.bottom - 28))
 
 def get_help_dialog_for_page(state):
     """Return context-sensitive help dialog based on current browser page and game state"""
@@ -180,6 +238,14 @@ def get_help_dialog_for_page(state):
             "From here, we can see the schedule of when the lights turn on and off.",
             "This information can help us understand the residents' routines.",
             "Let's continue exploring other devices on the network by going back to the router admin panel.",
+        ]
+    elif page_id == "smart_fridge":
+        # Smart light admin panel
+        return [
+            "This page doesn't have anything interesting.",
+            "Let's try to see the traffic going through the network using the 'wireshark' command.",
+            "Maybe we can find some non-encrypted credentials that we can reuse in another device.",
+            "Let's give it a shot.",
         ]
     else:
         # Generic help for other pages

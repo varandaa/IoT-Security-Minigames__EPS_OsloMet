@@ -74,7 +74,7 @@ def animate_bruteforce(state, total=1000, duration=3.0, prefix="Trying"):
 def execute_command(state, cmd):
     """Execute terminal command"""
     cmd = cmd.strip()
-    
+    skip = False
     if cmd == "help":
         show_help(state)
     elif cmd == 'ls':
@@ -88,10 +88,36 @@ def execute_command(state, cmd):
     elif cmd == "":
         pass
     elif cmd == "nmcli":
-        state.output_lines.append("[+]Looking for nearby Wifi networks...")
-        wait(state, 1)
-        state.output_lines.append("[+]Web page with Wifi networks opened!")
-        wifi_minigame.on_wifi_analyser(state, cmd)
+        if state.current_page["id"] != "empty":
+                dialog_handler.start_dialog(state, [
+                    "We are already inside the network.",
+                    "There is no need to run 'nmcli' again."
+                ], char_delay=20)
+                skip = True    
+        if not skip:
+            state.output_lines.append("[+]Looking for nearby Wifi networks...")
+            wait(state, 1)
+            state.output_lines.append("[+]Web page with Wifi networks opened!")
+            wifi_minigame.on_wifi_analyser(state, cmd)
+    elif cmd == "wireshark":
+        # Open a simple terminal-side packet inspector with sample packets
+        # Build a few sample packets; one contains Giggle credentials
+        # Attach inspector state to game state
+        if state.current_page["id"] != "smart_fridge":
+                dialog_handler.start_dialog(state, [
+                    "I see you want to inspect the network traffic.",
+                    "Smart.",
+                    "But we should stick to the plan, there is no need to run 'wireshark' right now."
+                ], char_delay=20)
+                skip = True
+        if not skip:
+            state.packet_inspector = {
+                "visible": True,
+                "packets": config.packets,
+                # rects will be filled during drawing for click detection
+                "packet_rects": []
+            }
+            state.output_lines.append("[+]Opened packet inspector (type 'wireshark' again or press ESC to close)")
     else:
         state.output_lines.append(f"'{cmd}' is not recognized as a command.")
 
@@ -106,6 +132,7 @@ def show_help(state):
     state.output_lines.append("  ./{exploit_name}  - Run an exploit")
     state.output_lines.append("  clear  - Clear the screen (can also use CTRL+L)")
     state.output_lines.append("  nmcli  - Scan for nearby Wifi networks and open web page to view them")
+    state.output_lines.append("  wireshark - Open a packet inspector in the terminal to inspect network traffic")
 
 def list_files(state):
     """List files in current directory"""

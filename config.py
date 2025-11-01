@@ -17,7 +17,7 @@ PATH = {
         "exploit-1.4.0-beta1"
     ],
 
-    "InternetOfFood": [
+    "InternetdOfFood": [
         "exploit-3.1.0", "exploit-2.0.0-rc1", "exploit-1.1.0",
         "exploit-1.1.1b", "exploit-0.7.0"
     ],
@@ -91,12 +91,24 @@ connected_devices = [
 
 network_info = [
     ("Network Name (SSID):", "                        Jonh-WiFi-5G"),
-    ("Security:", "WPA3-PSK"),
+    ("Security:", "WPA2-PSK"),
     ("Channel:", "Auto (5GHz)"),
     ("IP Address:", "    192.168.1.1"),
     ("Subnet Mask:", "        255.255.255.0"),
     ("DHCP Server:", "         Enabled"),
 ]
+
+packets = [
+    {"time": "12:01:02", "src": "192.168.1.75", "dst": "192.168.1.150", "proto": "HTTP", "len": 128,
+        "summary": "GET /status", "payload": ""},
+    {"time": "12:01:05", "src": "192.168.1.75", "dst": "192.168.1.150", "proto": "HTTP", "len": 256,
+        "summary": "POST /login", "payload": "username=john1122&password=JohnIsCool22!"},
+    {"time": "12:01:09", "src": "192.168.1.150", "dst": "192.168.1.75", "proto": "HTTP", "len": 200,
+        "summary": "200 OK", "payload": "session=abcd1234"},
+    {"time": "12:01:15", "src": "192.168.1.102", "dst": "192.168.1.1", "proto": "RTSP", "len": 512,
+        "summary": "SETUP", "payload": ""},
+]
+
 
 WIDTH = 1920
 HEIGHT = 1080

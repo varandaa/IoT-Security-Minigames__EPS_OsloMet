@@ -15,7 +15,6 @@ def handle_events(state, event):
     if dlg and dlg.get("visible"):
         if event.type == pygame.KEYDOWN:
             # Let dialog handler process Enter; other keys ignored
-            from handlers import dialog_handler
             dialog_handler.handle_key(state, event)
         # ignore mouse events while dialog active
         return
@@ -35,6 +34,13 @@ def handle_keyboard(state, event):
             return
 
     page = state.current_page
+    # Close packet inspector with ESC
+    inspector = getattr(state, 'packet_inspector', None)
+    if inspector and inspector.get('visible'):
+        if event.key == pygame.K_ESCAPE:
+            inspector['visible'] = False
+            state.output_lines.append("[+]Closed packet inspector")
+            return
     if event.key == pygame.K_RETURN:
         if state.browser_focus is not None:
             login_attempt(state)
@@ -88,6 +94,31 @@ def handle_mouse(state, event):
     """Handle mouse clicks"""
     mx, my = event.pos
 
+    # If packet inspector is visible, handle its clicks first
+    inspector = getattr(state, 'packet_inspector', None)
+    if inspector and inspector.get('visible') and state.terminal_rect.collidepoint((mx, my)):
+        # Close button
+        close_rect = inspector.get('close_rect')
+        if close_rect and close_rect.collidepoint((mx, my)):
+            inspector['visible'] = False
+            state.output_lines.append("[+]Closed packet inspector")
+            return
+
+        # Packet rows
+        for entry in inspector.get('packet_rects', []):
+            r = entry.get('rect')
+            if r and r.collidepoint((mx, my)):
+                pkt = entry.get('packet')
+                # Show packet payload in a dialog (typewriter)
+                payload = pkt.get('payload', '')
+                if not payload:
+                    payload = "(no payload)"
+                # Break payload into lines if too long
+                lines = [f"Time: {pkt.get('time')}", f"From: {pkt.get('src')} -> {pkt.get('dst')}", f"Protocol: {pkt.get('proto')}", f"Payload: {payload}"]
+                dialog_handler.start_dialog(state, lines, char_delay=12)
+                return
+
+
     # Check if Clippy icon was clicked (in terminal area)
     clippy_rect = getattr(state, "clippy_rect", None)
     if clippy_rect and clippy_rect.collidepoint((mx, my)):
@@ -139,6 +170,15 @@ def handle_mouse(state, event):
                             state.go_to_page_by_id("camera_login")  # camera login page
                         elif "fridge" in dev_name.lower() or "giggle" in dev_name.lower():
                             state.go_to_page_by_id("smart_fridge")  # smart fridge page
+                            dialog_handler.start_dialog(state, [
+                                    f"We're on the Smart Fridge page.",
+                                    "There isn't anything very interesting for us here.",
+                                    "However, we can see we're already logged in with the user's Giggle account.",
+                                    "We can try to inspect the traffic going through the network using the 'wireshark' command.",
+                                    "If there are some unencrypted credentials going through the network, we will be able to read them.",
+                                    "Let's give the 'wireshark' command a try!"
+                                ], char_delay=20)
+
                         # command_handler.change_directory(state, "cd ..")
                         elif "light" in dev_name.lower() or "lamp" in dev_name.lower():
                             state.go_to_page_by_id("smart_light_login")  # smart light hub page
@@ -186,8 +226,8 @@ def handle_mouse(state, event):
                 # Navigate back to RouteSimple admin
                 state.go_to_page_by_id("route_simple_admin")
                 dialog_handler.start_dialog(state, [
-                    "Returned to the RouteSimple admin panel.",
-                    "You can continue exploring connected devices from there."
+                    "We returned to the RouteSimple admin panel.",
+                    "Let's see if the 'Giggle-SmartFridge' has some interesting information for us."
                 ], char_delay=20)
                 return
     elif state.terminal_rect.collidepoint((mx, my)):
