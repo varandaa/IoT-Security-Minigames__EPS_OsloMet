@@ -105,39 +105,118 @@ def draw_packet_inspector(state):
     state.screen.blit(title, (header_rect.x + 10, header_rect.y + 6))
 
     # Close button
-    close_w = 72
-    close_h = 24
-    close_rect = pygame.Rect(box.right - close_w - 10, header_rect.y + 6, close_w, close_h)
-    pygame.draw.rect(state.screen, (150, 50, 50), close_rect, border_radius=6)
-    close_txt = state.ui_font.render("Close [ESC]", True, (255, 255, 255))
-    state.screen.blit(close_txt, (close_rect.x + 8, close_rect.y + 3))
+    close_w = 50
+    close_h = 22
+    close_rect = pygame.Rect(box.right - close_w - 8, header_rect.y + 7, close_w, close_h)
+    pygame.draw.rect(state.screen, (150, 50, 50), close_rect, border_radius=4)
+    close_txt = state.ui_font.render("[ESC]", True, (255, 255, 255))
+    state.screen.blit(close_txt, (close_rect.x + 6, close_rect.y + 2))
     inspector['close_rect'] = close_rect
 
     # Packet list area
     list_x = box.x + 10
-    list_y = header_rect.y + header_h + 8
+    list_y = header_rect.y + header_h + 24
     line_h = state.ui_font.get_height() + 6
 
+    # Column headers (like real Wireshark)
+    col_x = list_x
+    cols = [40, 100, 140, 140, 70, 60, box.width - 20 - (40+100+140+140+70+60)]
+    headers = ["No.", "Time", "Source", "Destination", "Protocol", "Len", "Info"]
+    # Draw header background
+    header_bg = pygame.Rect(list_x, list_y - 28, box.width - 20, 28)
+    pygame.draw.rect(state.screen, (28, 28, 28), header_bg)
+    pygame.draw.line(state.screen, (80, 80, 80), (list_x, list_y - 1), (box.right - 10, list_y - 1), 1)
+    hx = col_x
+    for w, h in zip(cols, headers):
+        hdr = state.ui_font.render(h, True, (200, 200, 200))
+        state.screen.blit(hdr, (hx + 4, header_bg.y + 6))
+        hx += w
+
     inspector['packet_rects'] = []
-    for i, pkt in enumerate(inspector.get('packets', [])):
+    selected_index = inspector.get('selected_index', None)
+    packets_list = inspector.get('packets', [])
+    
+    for i, pkt in enumerate(packets_list):
         row_y = list_y + i * line_h
-        # Background hover if mouse over
         row_rect = pygame.Rect(list_x, row_y, box.width - 20, line_h - 4)
         mouse_pos = pygame.mouse.get_pos()
-        if row_rect.collidepoint(mouse_pos):
-            pygame.draw.rect(state.screen, (30, 30, 30), row_rect)
+
+        # Highlight selected row (like Wireshark blue selection)
+        if selected_index == i:
+            pygame.draw.rect(state.screen, (50, 100, 150), row_rect)
+        elif row_rect.collidepoint(mouse_pos):
+            pygame.draw.rect(state.screen, (40, 40, 40), row_rect)
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
 
-        # Render packet summary
-        summary = f"{pkt['time']}  {pkt['src']} -> {pkt['dst']}  {pkt['proto']}  {pkt['len']}B  {pkt['summary']}"
-        txt = state.ui_font.render(summary, True, (200, 200, 200))
-        state.screen.blit(txt, (row_rect.x + 6, row_rect.y + 2))
+        # Render columns (like real Wireshark)
+        cx = list_x
+        col_texts = [str(i+1), pkt.get('time',''), pkt.get('src',''), pkt.get('dst',''), pkt.get('proto',''), str(pkt.get('len','')), pkt.get('summary','')]
+        col_color = (255, 255, 255) if selected_index == i else (200, 200, 200)
+        for j, txt_val in enumerate(col_texts):
+            txt_surf = state.ui_font.render(txt_val, True, col_color)
+            state.screen.blit(txt_surf, (cx + 6, row_rect.y + 2))
+            cx += cols[j]
 
-        inspector['packet_rects'].append({'rect': row_rect, 'packet': pkt})
+        inspector['packet_rects'].append({'rect': row_rect, 'packet': pkt, 'index': i})
+
+    # Draw hex/ASCII pane for selected packet (bottom half, like Wireshark)
+    packets_area_h = len(packets_list) * line_h + 28
+    hex_pane_y = list_y + packets_area_h + 8
+    hex_pane_h = box.bottom - hex_pane_y - 36
+    
+    if hex_pane_h > 60 and selected_index is not None and 0 <= selected_index < len(packets_list):
+        sel_pkt = packets_list[selected_index]
+        payload = sel_pkt.get('payload', '')
+        
+        # Hex pane box
+        hex_box = pygame.Rect(box.x + 10, hex_pane_y, box.width - 20, hex_pane_h)
+        pygame.draw.rect(state.screen, (20, 20, 20), hex_box)
+        pygame.draw.rect(state.screen, (60, 60, 60), hex_box, 1)
+        
+        # Hex pane title
+        hex_title = state.ui_font.render("Packet Bytes (Hex Dump)", True, (180, 180, 180))
+        state.screen.blit(hex_title, (hex_box.x + 8, hex_box.y + 4))
+        
+        # Convert payload to bytes for hex display
+        try:
+            data = payload.encode('utf-8')
+        except Exception:
+            data = bytes(str(payload), 'utf-8')
+        
+        # Render hex dump (16 bytes per line, like Wireshark)
+        bytes_per_line = 16
+        y0 = hex_box.y + 26
+        x0 = hex_box.x + 8
+        
+        # Calculate column widths dynamically
+        offset_width = state.ui_font.size("0000")[0] + 16
+        hex_width = state.ui_font.size("00 " * 16)[0] + 16
+        hex_col_x = x0 + offset_width
+        ascii_col_x = x0 + offset_width + hex_width
+        
+        for line_idx in range(0, min(6, (len(data) + bytes_per_line - 1) // bytes_per_line)):
+            offset = line_idx * bytes_per_line
+            chunk = data[offset:offset+bytes_per_line]
+            line_y = y0 + line_idx * (state.ui_font.get_height()+2)
+            
+            # Offset in hex
+            off_str = f"{offset:04x}"
+            off_surf = state.ui_font.render(off_str, True, (160, 160, 160))
+            state.screen.blit(off_surf, (x0, line_y))
+            
+            # Hex bytes
+            hex_bytes = ' '.join(f"{b:02x}" for b in chunk)
+            hex_surf = state.ui_font.render(hex_bytes, True, (180, 220, 180))
+            state.screen.blit(hex_surf, (hex_col_x, line_y))
+            
+            # ASCII representation (with proper spacing)
+            ascii_repr = ''.join((chr(b) if 32 <= b <= 126 else '.') for b in chunk)
+            ascii_surf = state.ui_font.render(ascii_repr, True, (180, 180, 220))
+            state.screen.blit(ascii_surf, (ascii_col_x, line_y))
 
     # Hint at bottom
-    hint = state.ui_font.render("Click a packet to inspect payload", True, (160, 160, 160))
-    state.screen.blit(hint, (box.x + 12, box.bottom - 28))
+    hint = state.ui_font.render("Click a packet to select and inspect", True, (140, 140, 140))
+    state.screen.blit(hint, (box.x + 12, box.bottom - 20))
 
 def get_help_dialog_for_page(state):
     """Return context-sensitive help dialog based on current browser page and game state"""

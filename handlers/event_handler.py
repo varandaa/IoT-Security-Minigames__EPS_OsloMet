@@ -104,18 +104,34 @@ def handle_mouse(state, event):
             state.output_lines.append("[+]Closed packet inspector")
             return
 
-        # Packet rows
+        # Packet rows - single click to select and show dialog for special packets
         for entry in inspector.get('packet_rects', []):
             r = entry.get('rect')
             if r and r.collidepoint((mx, my)):
+                packet_idx = entry.get('index', -1)
                 pkt = entry.get('packet')
-                # Show packet payload in a dialog (typewriter)
-                payload = pkt.get('payload', '')
-                if not payload:
-                    payload = "(no payload)"
-                # Break payload into lines if too long
-                lines = [f"Time: {pkt.get('time')}", f"From: {pkt.get('src')} -> {pkt.get('dst')}", f"Protocol: {pkt.get('proto')}", f"Payload: {payload}"]
-                dialog_handler.start_dialog(state, lines, char_delay=12)
+                
+                # Select the packet
+                inspector['selected_index'] = packet_idx
+                
+                # If this is the 2nd packet (index 1), show dialog about credentials
+                if packet_idx == 1:
+                    payload = pkt.get('payload', '')
+                    if not payload:
+                        payload = "(no payload)"
+                    lines = [
+                        "We found some credentials in the packet!",
+                        f"We can see them in the packet bytes - {payload}",
+                        "They are using HTTP instead of HTTPS, which doesn't encrypt the data.",
+                        "This means anyone inside the network can read it.",
+                        "This looks like a login attempt to the Giggle SmartFridge.",
+                        "There is another Giggle device on the network.",
+                        "We can certainly use the credentials we discovered to access it!"
+                    ]
+                    dialog_handler.start_dialog(state, lines, char_delay=15)
+                    # Mark that user has seen the credentials packet
+                    state.seen_credentials_packet = True
+                
                 return
 
 
@@ -228,6 +244,27 @@ def handle_mouse(state, event):
                 dialog_handler.start_dialog(state, [
                     "We returned to the RouteSimple admin panel.",
                     "Let's see if the 'Giggle-SmartFridge' has some interesting information for us."
+                ], char_delay=20)
+                return
+        # Smart Fridge: handle Back to RouteSimple button
+        elif page.get("id") == "smart_fridge":
+            back_rect = getattr(state, "smart_fridge_back_button_rect", None)
+            if back_rect and back_rect.collidepoint(event.pos):
+                # Gate: user must have seen the credentials packet first
+                if not state.seen_credentials_packet:
+                    dialog_handler.start_dialog(state, [
+                        "Hold on, you haven't inspected the network packets yet!",
+                        "Go back to the terminal and use the 'wireshark' command to sniff the network traffic.",
+                        "See if you can find some interesting informations."
+                    ], char_delay=20)
+                    return
+                
+                state.go_to_page_by_id("route_simple_admin")
+                dialog_handler.start_dialog(state, [
+                    "Back on the device list.",
+                    "As we can see there is a 'Giggle-HomePod' device connected to the network.",
+                    "We can certainly use the Giggle credentials we just discovered to login into the Home Pod.",
+                    "Let's check it out!"
                 ], char_delay=20)
                 return
     elif state.terminal_rect.collidepoint((mx, my)):

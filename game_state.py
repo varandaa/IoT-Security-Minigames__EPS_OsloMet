@@ -41,6 +41,9 @@ class GameState:
         self.browser_cursor_timer = 0
         self.browser_cursor_blink_speed = 500
         self.browser_focus = None  # Which field is focused (username, password, etc.)
+        
+        # Track if user has seen the credentials packet in wireshark
+        self.seen_credentials_packet = False
 
         # Browser pages state
         # Each page has its own login, bypass, etc.
@@ -198,7 +201,7 @@ class GameState:
             }
         ]
     # Start at the router login page so the flow begins with the router
-        self.go_to_page_by_id("smart_light_login") # empty page at start
+        self.go_to_page_by_id("smart_fridge") # empty page at start
 
         # Clock
         self.clock = pygame.time.Clock()

@@ -643,6 +643,22 @@ def draw_smart_fridge(state):
     inventory_y += 20
     temp_text = state.ui_font.render("Temperature: 4°C | Humidity: 65%", True, (150, 150, 150))
     state.screen.blit(temp_text, (state.browser_rect.x + padding, inventory_y))
+    
+    # Back to RouteSimple admin button (bottom-right corner)
+    btn_width = 180
+    btn_height = 36
+    btn_padding = 20
+    btn_x = state.browser_rect.right - btn_padding - btn_width
+    btn_y = state.browser_rect.bottom - btn_padding - btn_height
+    back_rect = pygame.Rect(btn_x, btn_y, btn_width, btn_height)
+    pygame.draw.rect(state.screen, BUTTON_BG, back_rect, border_radius=6)
+    pygame.draw.rect(state.screen, (160, 160, 160), back_rect, 2, border_radius=6)
+    back_text = state.ui_font.render("Back to Router Admin", True, BUTTON_TEXT)
+    tx = back_rect.x + (back_rect.width - back_text.get_width()) // 2
+    ty = back_rect.y + (back_rect.height - back_text.get_height()) // 2
+    state.screen.blit(back_text, (tx, ty))
+    # store rect for click handling
+    state.smart_fridge_back_button_rect = back_rect
 
 def draw_smart_light_login(state):
     """Draw a simple smart light hub login page."""
