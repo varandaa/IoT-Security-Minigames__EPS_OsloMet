@@ -171,21 +171,23 @@ def handle_mouse(state, event):
                                 required_stage = v
                                 break
 
-                        # Allow access if device's required_stage is <= current_stage_index + 1
-                        # (player can access the next stage after completing the previous one)
-                        if required_stage > (state.current_stage_index + 1):
+                        # Only allow access to the NEXT stage (not previous stages)
+                        # required_stage must equal current_stage_index + 1
+                        if required_stage != (state.current_stage_index + 1):
                             # blocked: show dialog explaining the order
                             dialog_handler.start_dialog(state, [
                                 f"You can't access {dev_name} yet.",
-                                "Let's stick to the plan, access the devices in the right order."
+                                "Let's focus on the current objective and follow the order."
                             ], char_delay=20)
                             return
 
                         # Allowed: perform navigation
                         if "cam" in dev_name.lower() or "camera" in dev_name.lower():
                             state.go_to_page_by_id("camera_login")  # camera login page
-                        elif "fridge" in dev_name.lower() or "giggle" in dev_name.lower():
+                        elif "fridge" in dev_name.lower():
                             state.go_to_page_by_id("smart_fridge")  # smart fridge page
+                            # Update progression when accessing fridge
+                            state.current_stage_index = max(state.current_stage_index, 3)
                             dialog_handler.start_dialog(state, [
                                     f"We're on the Smart Fridge page.",
                                     "There isn't anything very interesting for us here.",
@@ -194,7 +196,19 @@ def handle_mouse(state, event):
                                     "If there are some unencrypted credentials going through the network, we will be able to read them.",
                                     "Let's give the 'wireshark' command a try!"
                                 ], char_delay=20)
-
+                        elif "homepod" in dev_name.lower():
+                            # Giggle HomePod device
+                            state.go_to_page_by_id("giggle_login")
+                            page = state.current_page
+                            if page.get("bypassed", False):
+                                # If already bypassed, go to admin panel directly
+                                state.go_to_page_by_id("giggle_admin")
+                            else:
+                                dialog_handler.start_dialog(state, [
+                                    f"We've reached the Giggle HomePod login page.",
+                                    "We have the Giggle credentials from the wireshark packet we inspected.",
+                                    "Let's use them to login and access the HomePod's admin panel."
+                                ], char_delay=20)
                         # command_handler.change_directory(state, "cd ..")
                         elif "light" in dev_name.lower() or "lamp" in dev_name.lower():
                             state.go_to_page_by_id("smart_light_login")  # smart light hub page

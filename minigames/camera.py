@@ -29,6 +29,6 @@ def on_bruteforce_success(state, exploit_name: str):
     
     # Advance progression to indicate camera is hacked
     try:
-        state.current_stage_index = max(state.current_stage_index, 3)
+        state.current_stage_index = max(state.current_stage_index, 1)
     except Exception:
         pass

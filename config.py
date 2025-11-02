@@ -138,13 +138,15 @@ DEVICE_STAGE_MAP = {
     "cam": 1,
     "camera": 1,
     "light": 2,
+    "lamp": 2,
     "route": 0,
     "routesimple": 0,
     "fridge": 3,
+    "homepod": 4,
 }
 
 USERNAME_LIGHT = "john"
 PASSWORD_LIGHT = "Winter2001!"
 
-USERNAME_GIGGLE = "giggle_user"
-PASSWORD_GIGGLE = "GiggleHome2025!"
+USERNAME_GIGGLE = "john1122"
+PASSWORD_GIGGLE = "John2206_"

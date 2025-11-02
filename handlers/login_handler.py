@@ -25,7 +25,7 @@ def login_attempt(state):
                 "Maybe we can use the password we found for the camera ?",
                 "It's on the terminal history if you need to check."
             ], char_delay=20)
-            state.current_stage_index = max(state.current_stage_index, 4)
+            state.current_stage_index = max(state.current_stage_index, 2)
             return True
         else:
             page["login_failed"] = True
@@ -42,7 +42,7 @@ def login_attempt(state):
                 "Accessing Giggle admin panel now."
             ], char_delay=20)
             # promote progression a bit (arbitrary stage)
-            state.current_stage_index = max(state.current_stage_index, 3)
+            state.current_stage_index = max(state.current_stage_index, 4)
             return True
         else:
             page["login_failed"] = True
