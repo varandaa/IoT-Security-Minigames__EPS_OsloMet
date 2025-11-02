@@ -6,6 +6,7 @@ from ui.browser import draw_browser
 from handlers.event_handler import handle_events
 from handlers.resize_handler import handle_resize
 from handlers import dialog_handler
+from handlers import audio_handler
 
 def main():
     pygame.init()
@@ -19,6 +20,8 @@ def main():
         state.update_cursors(dt)
         # Update dialog handler (typewriter animation)
         dialog_handler.update_dialog(state, dt)
+        # Update audio visualization
+        audio_handler.update_visualization(dt)
         state.check_transition()
         
         for event in pygame.event.get():

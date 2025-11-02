@@ -44,6 +44,9 @@ class GameState:
         
         # Track if user has seen the credentials packet in wireshark
         self.seen_credentials_packet = False
+        
+        # Track if user has listened to HomePod audio
+        self.listened_to_homepod = False
 
         # Browser pages state
         # Each page has its own login, bypass, etc.
@@ -201,7 +204,7 @@ class GameState:
             }
         ]
     # Start at the router login page so the flow begins with the router
-        self.go_to_page_by_id("empty") # empty page at start
+        self.go_to_page_by_id("giggle_admin") # empty page at start
 
         # Clock
         self.clock = pygame.time.Clock()

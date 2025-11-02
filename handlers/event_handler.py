@@ -281,6 +281,51 @@ def handle_mouse(state, event):
                     "Let's check it out!"
                 ], char_delay=20)
                 return
+        # Giggle HomePod admin: handle Listen to HomePod button
+        elif page.get("id") == "giggle_admin":
+            listen_rect = getattr(state, "giggle_listen_button_rect", None)
+            if listen_rect and listen_rect.collidepoint(event.pos):
+                # Try to play audio from HomePod recording
+                from handlers import audio_handler
+                success = audio_handler.play_audio("homepod_recording")
+                if success:
+                    state.output_lines.append("[+] Playing HomePod recording...")
+                    # Mark that user has listened to the audio
+                    state.listened_to_homepod = True
+                    dialog_handler.start_dialog(state, [
+                        "Listening to the HomePod recording...",
+                        "",
+                        "",
+                        "They mentioned the PIN of the smart lock!",
+                        "It's 3001!"
+                    ], char_delay=20)
+                else:
+                    dialog_handler.start_dialog(state, [
+                        "No audio file found.",
+                        "The HomePod recording is not available in the system."
+                    ], char_delay=20)
+                return
+            
+            # Handle Back to RouteSimple button
+            back_rect = getattr(state, "giggle_back_button_rect", None)
+            if back_rect and back_rect.collidepoint(event.pos):
+                # Gate: user must have listened to the audio first
+                if not state.listened_to_homepod:
+                    dialog_handler.start_dialog(state, [
+                        "Hold on! You haven't listened to the HomePod recording yet.",
+                        "Click the 'Listen to HomePod' button to hear the recording first.",
+                        "It may contain important information you need to gather."
+                    ], char_delay=20)
+                    return
+                
+                # Allow navigation back
+                state.go_to_page_by_id("route_simple_admin")
+                dialog_handler.start_dialog(state, [
+                    "Now that we know the PIN, let's just access the Smart Lock.",
+                    "This is the last step of our mission.",
+                    "Let's go!"
+                ], char_delay=20)
+                return
     elif state.terminal_rect.collidepoint((mx, my)):
             state.browser_focus = None
 

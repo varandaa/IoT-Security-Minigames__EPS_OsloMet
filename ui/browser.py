@@ -810,33 +810,136 @@ def draw_giggle_login(state):
 
 
 def draw_giggle_admin(state):
-    """Draw a simple admin panel for the Giggle HomePod."""
+    """Draw enhanced admin panel for the Giggle HomePod."""
     padding = 40
-    start_y = state.browser_rect.y + 140
+    start_y = state.browser_rect.y + 80
+    
+    # Draw Giggle logo at the top
+    try:
+        giggle_logo = pygame.image.load("./assets/giggle-logo.png").convert_alpha()
+        logo_height = 70
+        scale = logo_height / giggle_logo.get_height()
+        giggle_logo = pygame.transform.smoothscale(
+            giggle_logo,
+            (int(giggle_logo.get_width() * scale), logo_height)
+        )
+        logo_x = state.browser_rect.x + padding
+        state.screen.blit(giggle_logo, (logo_x, start_y))
+    except Exception:
+        pass  # Skip logo if not found
 
-    title = state.title_font.render("Giggle HomePod — Admin", True, TEXT_COLOR)
-    state.screen.blit(title, (state.browser_rect.x + padding, start_y))
+    # Title next to logo
+    title = state.title_font.render("HomePod Admin", True, TEXT_COLOR)
+    state.screen.blit(title, (state.browser_rect.x + padding + 200, start_y + 15))
+    
+    y = start_y + 90
+    
+    # Divider line
+    pygame.draw.line(state.screen, (220, 220, 220),
+                     (state.browser_rect.x + padding, y),
+                     (state.browser_rect.right - padding, y), 1)
+    
+    y += 30
 
-    # Small status box
-    y = start_y + 50
-    status_label = state.ui_font.render("Status:", True, (100, 100, 100))
-    status_value = state.ui_font.render("Online", True, (67, 160, 71))
-    state.screen.blit(status_label, (state.browser_rect.x + padding, y))
-    state.screen.blit(status_value, (state.browser_rect.x + padding + 100, y))
+    # Device Info Section with better styling
+    section_font_bold = pygame.font.Font(pygame.font.match_font('dejavusans', bold=True), state.ui_font.get_height())
+    device_title = section_font_bold.render("Device Information", True, TEXT_COLOR)
+    state.screen.blit(device_title, (state.browser_rect.x + padding, y))
+    y += 35
+    
+    # Info grid
+    info_items = [
+        ("Status:", "Online", (67, 160, 71)),
+        ("Volume:", "72%", TEXT_COLOR),
+        ("Firmware:", "v3.2.0", (140, 140, 140)),
+        ("Uptime:", "6 days, 4 hours", (140, 140, 140))
+    ]
+    
+    for label, value, color in info_items:
+        info_label = state.ui_font.render(label, True, (100, 100, 100))
+        info_value = state.ui_font.render(value, True, color)
+        state.screen.blit(info_label, (state.browser_rect.x + padding + 10, y))
+        state.screen.blit(info_value, (state.browser_rect.x + padding + 150, y))
+        y += 28
 
-    y += 36
-    # Volume / playback mock settings
-    vol_label = state.ui_font.render("Volume:", True, (100, 100, 100))
-    vol_value = state.ui_font.render("72%", True, TEXT_COLOR)
-    state.screen.blit(vol_label, (state.browser_rect.x + padding, y))
-    state.screen.blit(vol_value, (state.browser_rect.x + padding + 100, y))
+    y += 20
+    
+    # Recordings Section
+    recording_title = section_font_bold.render("Recent Recordings", True, TEXT_COLOR)
+    state.screen.blit(recording_title, (state.browser_rect.x + padding, y))
+    y += 35
+    
+    # Enhanced Listen to HomePod button with icon-like styling
+    btn_width = 280
+    btn_height = 50
+    btn_x = state.browser_rect.x + padding + 20
+    btn_y = y
+    listen_btn_rect = pygame.Rect(btn_x, btn_y, btn_width, btn_height)
+    
+    # Button with gradient-like effect (darker border)
+    pygame.draw.rect(state.screen, (70, 130, 180), listen_btn_rect, border_radius=8)
+    pygame.draw.rect(state.screen, (100, 160, 220), listen_btn_rect.inflate(-4, -4), border_radius=7)
+    
+    # Add play icon (triangle)
+    icon_size = 16
+    icon_x = btn_x + 20
+    icon_y = btn_y + (btn_height - icon_size) // 2
+    play_triangle = [
+        (icon_x, icon_y),
+        (icon_x, icon_y + icon_size),
+        (icon_x + icon_size, icon_y + icon_size // 2)
+    ]
+    pygame.draw.polygon(state.screen, (255, 255, 255), play_triangle)
+    
+    # Button text
+    listen_text = state.ui_font.render("Play Recording (2:34)", True, (255, 255, 255))
+    tx = btn_x + 50
+    ty = btn_y + (btn_height - listen_text.get_height()) // 2
+    state.screen.blit(listen_text, (tx, ty))
+    
+    # Store rect for click handling
+    state.giggle_listen_button_rect = listen_btn_rect
 
-    y += 36
-    firmware = state.ui_font.render("Firmware: v3.2.0 | Uptime: 6 days, 4 hours", True, (140, 140, 140))
-    state.screen.blit(firmware, (state.browser_rect.x + padding, y))
-
-    # Optionally expose a rect for a back button if handlers want it (not required)
-    # Provide a small action hint
-    y += 48
-    hint = state.ui_font.render("Use the admin controls to manage playback and settings.", True, (120,120,120))
-    state.screen.blit(hint, (state.browser_rect.x + padding, y))
+    # Sound wave visualization when audio is playing
+    y += 60
+    from handlers import audio_handler
+    if audio_handler.audio_visualization_state["is_playing"]:
+        # Create a box for the visualization
+        wave_box = pygame.Rect(state.browser_rect.x + padding, y, state.browser_rect.width - padding * 2, 100)
+        pygame.draw.rect(state.screen, (240, 245, 250), wave_box, border_radius=8)
+        pygame.draw.rect(state.screen, (200, 210, 220), wave_box, 2, border_radius=8)
+        
+        wave_label = section_font_bold.render("Now Playing", True, (70, 130, 180))
+        state.screen.blit(wave_label, (wave_box.x + 15, wave_box.y + 10))
+        
+        audio_handler.draw_sound_wave(
+            state.screen,
+            wave_box.x + 15,
+            wave_box.y + 45,
+            wave_box.width - 30,
+            40,
+            color=(70, 130, 180)
+        )
+        y += 110
+    else:
+        y += 10
+    
+    # Recording description
+    desc = state.ui_font.render("Latest conversation recording from HomePod", True, (120, 120, 120))
+    state.screen.blit(desc, (state.browser_rect.x + padding + 20, y))
+    
+    # Back to RouteSimple admin button (bottom-right corner)
+    btn_width = 180
+    btn_height = 36
+    btn_padding = 20
+    btn_x = state.browser_rect.right - btn_padding - btn_width
+    btn_y = state.browser_rect.bottom - btn_padding - btn_height
+    back_rect = pygame.Rect(btn_x, btn_y, btn_width, btn_height)
+    pygame.draw.rect(state.screen, BUTTON_BG, back_rect, border_radius=6)
+    pygame.draw.rect(state.screen, (160, 160, 160), back_rect, 2, border_radius=6)
+    back_text = state.ui_font.render("Back to Router Admin", True, BUTTON_TEXT)
+    tx = back_rect.x + (back_rect.width - back_text.get_width()) // 2
+    ty = back_rect.y + (back_rect.height - back_text.get_height()) // 2
+    state.screen.blit(back_text, (tx, ty))
+    # store rect for click handling
+    state.giggle_back_button_rect = back_rect
