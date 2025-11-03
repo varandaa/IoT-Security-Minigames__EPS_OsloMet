@@ -284,7 +284,7 @@ def get_help_dialog_for_page(state):
             "You can do so by typing './hydra {wordlist_name}'.",
             "Be patient - you might have to try different wordlists to guess the credentials.",
         ]
-    elif page_id == "camera_video" or camera_bypassed:
+    elif page_id == "camera_video":
         # Camera feed or camera is bypassed
         return [
             "Amazing work! You've accessed the camera.",
@@ -307,8 +307,7 @@ def get_help_dialog_for_page(state):
         return [
             "This is the smart light hub login page.",
             "We can try to use the same password we found for the camera to bypass this login.",
-            "I remember the credentials are :",
-            f"Username: {USERNAME_LIGHT} | Password: {PASSWORD_LIGHT}",
+            f"I remember the credentials are: Username - {USERNAME_LIGHT} | Password - {PASSWORD_LIGHT}",
         ]
     elif page_id == "smart_light_admin":
         # Smart light admin panel

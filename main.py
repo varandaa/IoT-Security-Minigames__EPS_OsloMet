@@ -9,6 +9,7 @@ from handlers import dialog_handler
 from handlers import audio_handler
 
 def main():
+    print(sys.platform)
     pygame.init()
     
     # Initialize game state

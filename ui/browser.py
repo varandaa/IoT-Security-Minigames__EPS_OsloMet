@@ -316,19 +316,19 @@ def draw_version(state):
 def draw_alert(state, bypassed):
     """Draw bypass success alert"""
     bg_color = FAILED_ALERT_BG
-    alert_min_w = 170
+    alert_w = 140
     alert_string = "INVALID LOGIN"
     if bypassed:
         bg_color = BYPASS_ALERT_BG
-        alert_min_w = 150
+        alert_w = 110
         alert_string = "VALID LOGIN"
  
-    alert_w = min(alert_min_w, state.login_box_w - 20)
+    # Use fixed width for alert boxes to prevent them from being too wide
     alert_rect = pygame.Rect(state.login_box_x + state.login_box_w - alert_w - 10, 
                             state.login_box_y - 34, alert_w, 28)
     pygame.draw.rect(state.screen, bg_color, alert_rect, border_radius=6)
     alert_txt = state.ui_font.render(alert_string, True, (255, 255, 255))
-    state.screen.blit(alert_txt, (alert_rect.x, 
+    state.screen.blit(alert_txt, (alert_rect.x + 6, 
                                   alert_rect.y + (alert_rect.height - alert_txt.get_height()) // 2))
 
 def draw_field_cursor(state):
@@ -713,7 +713,7 @@ def draw_smart_light_admin(state):
     # expose rect so event handler can detect clicks
     state.smart_light_back_button_rect = back_btn_rect
 
-    y = start_y + 50
+    y = start_y + 100
 
     # Read state from page
     page = state.current_page
@@ -728,7 +728,7 @@ def draw_smart_light_admin(state):
 
     # Title for chart
     chart_title = state.ui_font.render("Weekly Schedule (hours) — color & intensity", True, (120,120,120))
-    state.screen.blit(chart_title, (chart_x, y - 30))
+    state.screen.blit(chart_title, (chart_x, y - 40))
 
     for di, day in enumerate(days):
         row_y = y + di * 28

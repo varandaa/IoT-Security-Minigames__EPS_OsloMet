@@ -8,3 +8,7 @@ Set of minigames used as part of an interactive exhibition that teaches users ab
   - **Credential Reuse**: Use the same credentials from the camera to access the smart lamp
   - **Packet Sniffing**: Inspect the network traffic to read clear-text credentials being sent and use them to access the Home Pod
   - **Eavesdropping**: Listen to a conversation through the HomePod that reveals the Smart Locks' PIN
+
+## Flow Diagram with LED instructions
+
+![](assets/led_diagram.jpeg)

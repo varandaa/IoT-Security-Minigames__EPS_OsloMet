@@ -11,7 +11,6 @@ def login_attempt(state):
     # Clear focus after attempting
     state.browser_focus = None
 
-    # Smart light login: accept any non-empty username/password as a successful login
     if page.get("id") == "smart_light_login":
         if username == USERNAME_LIGHT and password == PASSWORD_LIGHT:
             page["bypassed"] = True
@@ -19,11 +18,10 @@ def login_attempt(state):
             # navigate to admin panel
             state.go_to_page_by_id("smart_light_admin")
             dialog_handler.start_dialog(state, [
-                f"We've reached the smart light hub login page.",
-                "Let's try to bypass its login to access the admin panel.",
-                "The user often uses the same password multiple times.",
-                "Maybe we can use the password we found for the camera ?",
-                "It's on the terminal history if you need to check."
+                f"We've reached the smart light hub admin panel.",
+                "From the light usage history we can see that during week days they get up at 7.",
+                "They also go to sleep at around 23 or midnight.",
+                "Most importantly, we know they aren't usually home from 9 to 18. That's the best time to break in!"
             ], char_delay=20)
             state.current_stage_index = max(state.current_stage_index, 2)
             return True

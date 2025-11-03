@@ -99,9 +99,9 @@ network_info = [
 
 packets = [
     {"time": "12:01:02", "src": "192.168.1.75", "dst": "192.168.1.150", "proto": "HTTP", "len": 128,
-        "summary": "GET /status", "payload": ""},
+        "summary": "GET /status", "payload": "username=john112&role=admin&status=online"},
     {"time": "12:01:05", "src": "192.168.1.75", "dst": "192.168.1.150", "proto": "HTTP", "len": 256,
-        "summary": "POST /login", "payload": "username=john1122&password=John2206_"},
+        "summary": "POST /login", "payload": "username=john112&password=John2206_"},
     {"time": "12:01:09", "src": "192.168.1.150", "dst": "192.168.1.75", "proto": "HTTP", "len": 200,
         "summary": "200 OK", "payload": "session=abcd1234"},
     {"time": "12:01:15", "src": "192.168.1.102", "dst": "192.168.1.1", "proto": "RTSP", "len": 512,
@@ -148,5 +148,5 @@ DEVICE_STAGE_MAP = {
 USERNAME_LIGHT = "john"
 PASSWORD_LIGHT = "Winter2001!"
 
-USERNAME_GIGGLE = "john1122"
+USERNAME_GIGGLE = "john112"
 PASSWORD_GIGGLE = "John2206_"
