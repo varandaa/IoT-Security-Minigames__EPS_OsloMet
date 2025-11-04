@@ -315,22 +315,39 @@ def draw_version(state):
     state.screen.blit(version_label, (version_x, version_y))
 
 def draw_alert(state, bypassed):
-    """Draw bypass success alert"""
-    bg_color = FAILED_ALERT_BG
-    alert_w = 140
-    alert_string = "INVALID LOGIN"
-    if bypassed:
-        bg_color = BYPASS_ALERT_BG
-        alert_w = 110
-        alert_string = "VALID LOGIN"
- 
-    # Use fixed width for alert boxes to prevent them from being too wide
-    alert_rect = pygame.Rect(state.login_box_x + state.login_box_w - alert_w - 10, 
-                            state.login_box_y - 34, alert_w, 28)
-    pygame.draw.rect(state.screen, bg_color, alert_rect, border_radius=6)
-    alert_txt = state.ui_font.render(alert_string, True, (255, 255, 255))
-    state.screen.blit(alert_txt, (alert_rect.x + 6, 
-                                  alert_rect.y + (alert_rect.height - alert_txt.get_height()) // 2))
+    """Draw a compact alert centered under the login button, no background, non-italic text."""
+    alert_string = "VALID LOGIN" if bypassed else "INVALID LOGIN"
+
+    # Use the UI font but ensure it's not italic
+    font = state.ui_font
+    try:
+        prev_italic = font.get_italic()
+        font.set_italic(False)
+    except Exception:
+        prev_italic = False
+
+    # Choose text color based on result
+    text_color = BYPASS_ALERT_BG if bypassed else FAILED_ALERT_BG
+    text_surf = font.render(alert_string, True, text_color)
+
+    # Restore italic state if we changed it
+    try:
+        font.set_italic(prev_italic)
+    except Exception:
+        pass
+
+    # Position: centered under the login button (slightly spaced)
+    login_btn = getattr(state, "login_button_rect", None)
+    if login_btn:
+        x = login_btn.centerx - text_surf.get_width() // 2
+        y = login_btn.bottom + 8
+    else:
+        # fallback: center in login box
+        x = state.login_box_x + (state.login_box_w - text_surf.get_width()) // 2
+        y = state.login_box_y + state.login_box_h + 8
+
+    # Draw the text directly (no background)
+    state.screen.blit(text_surf, (x, y))
 
 def draw_field_cursor(state):
     """Draw blinking cursor in focused field"""
