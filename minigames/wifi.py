@@ -42,6 +42,8 @@ def on_wifi_crack_attempt(state, exploit_cmd: str, wait_func):
                 ], char_delay=20)
         else:
             state.output_lines.append(f"[-]Wifi network '{wifi_name}' not found nearby.")
+    else:
+        state.output_lines.append("[-]Invalid command format. Use: ./fern-wifi-cracker <wifi_name>")
 
 def on_wifi_crack_success(state, wifi_name: str):
     """Handle state updates when Wifi cracking succeeds."""

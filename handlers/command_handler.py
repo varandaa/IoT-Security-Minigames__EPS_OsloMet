@@ -161,6 +161,13 @@ def change_directory(state, cmd):
 def run_exploit(state, exploit_cmd):
     """Run an exploit"""
     exploit = exploit_cmd.split(" ")[0]
+
+    if exploit == "fern-wifi-cracker": # check if wifi name provided
+        command = exploit_cmd.split(" ")
+        if len(command) == 1:
+            state.output_lines.append("[-]Please specify the Wifi network name to crack. Usage: ./fern-wifi-cracker <wifi_name>")
+            return
+
     if exploit in config.PATH.get("devices"):
         state.output_lines.append("That is a folder. It isn't an exploit!")
     elif exploit in config.PATH.get(state.current_folder.split("/")[state.level]):

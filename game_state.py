@@ -205,14 +205,14 @@ class GameState:
             }
         ]
     # Start at the router login page so the flow begins with the router
-        self.go_to_page_by_id("route_simple_admin") # empty page at start
+        self.go_to_page_by_id("wifi_networks") # empty page at start
 
         # Clock
         self.clock = pygame.time.Clock()
 
         # Progression: which stage the player has reached (index into config.STAGE_ORDER)
         # Start at -1 (nothing hacked). When they bypass router, set to 0.
-        self.current_stage_index = 0
+        self.current_stage_index = -1
         
         # Fonts
         self.mono_font = None
