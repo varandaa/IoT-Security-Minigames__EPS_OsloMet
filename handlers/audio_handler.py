@@ -88,8 +88,13 @@ def play_audio(audio_name):
         return False
     
     try:
-        sound = pygame.mixer.Sound(audio_path)
-        sound.play()
+        # Stop any currently playing audio first
+        pygame.mixer.music.stop()
+        
+        # Load and play the audio using music (better for longer files and can be stopped)
+        pygame.mixer.music.load(audio_path)
+        pygame.mixer.music.play()
+        
         # Initialize visualization state
         audio_visualization_state["is_playing"] = True
         audio_visualization_state["wave_heights"] = [20] * 20
@@ -100,11 +105,16 @@ def play_audio(audio_name):
 
 def stop_audio():
     """Stop all audio playback"""
+    pygame.mixer.music.stop()
     pygame.mixer.stop()
+    # Reset visualization state
+    audio_visualization_state["is_playing"] = False
+    audio_visualization_state["wave_heights"] = [0] * 20
+    audio_visualization_state["animation_timer"] = 0
 
 def is_audio_playing():
     """Check if audio is currently playing"""
-    return pygame.mixer.get_busy()
+    return pygame.mixer.music.get_busy() or pygame.mixer.get_busy()
 
 def get_available_audio_files():
     """Get list of all audio files available in assets folder"""

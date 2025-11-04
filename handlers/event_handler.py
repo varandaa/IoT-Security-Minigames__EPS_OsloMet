@@ -4,6 +4,7 @@ from handlers.command_handler import execute_command
 from handlers.login_handler import login_attempt
 from handlers import dialog_handler
 from handlers import command_handler
+from handlers import audio_handler
 from minigames import camera as camera_minigame
 
 # Use camera_minigame.cap when needing to control/release the camera
@@ -270,6 +271,8 @@ def handle_mouse(state, event):
                         "It may contain important information you need to gather."
                     ], char_delay=20)
                     return
+                # Stop any playing audio before navigating away
+                audio_handler.stop_audio()
                 state.go_to_page_by_id("route_simple_admin")
                 dialog_handler.start_dialog(state, [
                     "Now that we know the PIN, let's just access the Smart Lock.",
@@ -298,7 +301,6 @@ def handle_mouse(state, event):
             listen_rect = getattr(state, "giggle_listen_button_rect", None)
             if listen_rect and listen_rect.collidepoint(event.pos):
                 # Try to play audio from HomePod recording
-                from handlers import audio_handler
                 success = audio_handler.play_audio("homepod_recording")
                 if success:
                     state.output_lines.append("[+] Playing HomePod recording...")
@@ -316,27 +318,6 @@ def handle_mouse(state, event):
                         "No audio file found.",
                         "The HomePod recording is not available in the system."
                     ], char_delay=20)
-                return
-            
-            # Handle Back to RouteSimple button
-            back_rect = getattr(state, "giggle_back_button_rect", None)
-            if back_rect and back_rect.collidepoint(event.pos):
-                # Gate: user must have listened to the audio first
-                if not state.listened_to_homepod:
-                    dialog_handler.start_dialog(state, [
-                        "Hold on! You haven't listened to the HomePod recording yet.",
-                        "Click the 'Listen to HomePod' button to hear the recording first.",
-                        "It may contain important information you need to gather."
-                    ], char_delay=20)
-                    return
-                
-                # Allow navigation back
-                state.go_to_page_by_id("route_simple_admin")
-                dialog_handler.start_dialog(state, [
-                    "Now that we know the PIN, let's just access the Smart Lock.",
-                    "This is the last step of our mission.",
-                    "Let's go!"
-                ], char_delay=20)
                 return
     elif state.terminal_rect.collidepoint((mx, my)):
             state.browser_focus = None

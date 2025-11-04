@@ -205,7 +205,7 @@ class GameState:
             }
         ]
     # Start at the router login page so the flow begins with the router
-        self.go_to_page_by_id("empty") # empty page at start
+        self.go_to_page_by_id("giggle_admin") # empty page at start
 
         # Clock
         self.clock = pygame.time.Clock()

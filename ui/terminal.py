@@ -325,6 +325,17 @@ def get_help_dialog_for_page(state):
             "Maybe we can find some non-encrypted credentials that we can reuse in another device.",
             "Let's give it a shot.",
         ]
+    elif page_id == "giggle_login":
+        return [
+            "Let's use the Giggle credentials we got from seeing the packets going through the network to login!",
+            "You can see them on the wireshark panel on the left.",
+            "In case you closed it, the credentials were: Username - john112 | Password - John2206_"
+        ]
+    elif page_id == "giggle_admin":
+        return [
+            "We are inside the HomePod admin panel.",
+            "We are able to listen to a recording, press the button to see if we can find something interesting!"
+        ]
     else:
         # Generic help for other pages
         return [
