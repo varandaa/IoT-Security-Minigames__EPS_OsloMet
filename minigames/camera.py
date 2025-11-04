@@ -7,6 +7,7 @@ Provides:
 import cv2
 from handlers import dialog_handler
 from config import USERNAME_LIGHT, PASSWORD_LIGHT
+from handlers.arduino_handler import send_command_to_arduino
 
 # OpenCV camera setup used by camera minigame
 cap = cv2.VideoCapture(0)
@@ -20,6 +21,7 @@ def on_bruteforce_success(state, exploit_name: str):
     state.current_page["bypassed"] = True
     # switch to camera video page
     state.go_to_page_by_id("camera_video")
+    send_command_to_arduino("C")
     
     dialog_handler.start_dialog(state, [
             "Nice!",

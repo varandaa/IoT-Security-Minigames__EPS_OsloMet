@@ -2,7 +2,7 @@ import time
 import serial
 import sys
 
-port = "COM1" if sys.platform.startswith('win') else "/dev/ttyACM0"
+port = "COM3" if sys.platform.startswith('win') else "/dev/ttyACM0"
 
 try:
     arduino = serial.Serial(port, 9600)
@@ -12,9 +12,9 @@ except Exception as e:
     print(f"Error connecting to Arduino: {e}")
     arduino = None
 
-def send_command(command):
+def send_command_to_arduino(command):
     if arduino and arduino.is_open:
         arduino.write(command.encode())
         print(f"Sent command: {command}")
     else:
-        print("Arduino is not connected.")
+        print(f"Did not send command: {command}. Arduino is not connected.")

@@ -1,5 +1,6 @@
 import pygame
 from handlers import dialog_handler
+from handlers.arduino_handler import send_command_to_arduino
 
 wifi_networks = [
     ("John_Home_Wifi", "WPA2", -40), # the one to be hacked needs to be first
@@ -46,6 +47,7 @@ def on_wifi_crack_success(state, wifi_name: str):
     """Handle state updates when Wifi cracking succeeds."""
     state.output_lines.append(f"[+]Successfully cracked the Wifi network: {wifi_name}!")
     state.go_to_page_by_id("route_simple_login")
+    send_command_to_arduino("2")
     dialog_handler.start_dialog(state, [
             f"Great! You've cracked the Wifi network '{wifi_name}'.",
             "Now we're inside the home network."

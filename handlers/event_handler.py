@@ -1,4 +1,5 @@
 import pygame
+from handlers.arduino_handler import send_command_to_arduino
 from handlers.command_handler import execute_command
 from handlers.login_handler import login_attempt
 from handlers import dialog_handler
@@ -184,8 +185,10 @@ def handle_mouse(state, event):
                         # Allowed: perform navigation
                         if "cam" in dev_name.lower() or "camera" in dev_name.lower():
                             state.go_to_page_by_id("camera_login")  # camera login page
+                            send_command_to_arduino("3")
                         elif "fridge" in dev_name.lower():
                             state.go_to_page_by_id("smart_fridge")  # smart fridge page
+                            send_command_to_arduino("E") # since we don't hack it, send E to indicate "hacked"
                             # Update progression when accessing fridge
                             state.current_stage_index = max(state.current_stage_index, 3)
                             dialog_handler.start_dialog(state, [
@@ -199,11 +202,12 @@ def handle_mouse(state, event):
                         elif "homepod" in dev_name.lower():
                             # Giggle HomePod device
                             state.go_to_page_by_id("giggle_login")
+                            send_command_to_arduino("6")
                             page = state.current_page
-                            if page.get("bypassed", False):
-                                # If already bypassed, go to admin panel directly
-                                state.go_to_page_by_id("giggle_admin")
-                            else:
+                            if not page.get("bypassed", False):
+                            #     # If already bypassed, go to admin panel directly
+                            #     state.go_to_page_by_id("giggle_admin")
+                            # else:
                                 dialog_handler.start_dialog(state, [
                                     f"We've reached the Giggle HomePod login page.",
                                     "We have the Giggle credentials from the wireshark packet we inspected.",
@@ -212,11 +216,9 @@ def handle_mouse(state, event):
                         # command_handler.change_directory(state, "cd ..")
                         elif "light" in dev_name.lower() or "lamp" in dev_name.lower():
                             state.go_to_page_by_id("smart_light_login")  # smart light hub page
+                            send_command_to_arduino("4")
                             page = state.current_page
-                            if page.get("bypassed", False):
-                                # If already bypassed, go to admin panel directly
-                                state.go_to_page_by_id("smart_light_admin")
-                            else:
+                            if not page.get("bypassed", False):
                                 dialog_handler.start_dialog(state, [
                                     f"We've reached the smart light hub login page.",
                                     "Let's try to bypass its login to access the admin panel.",

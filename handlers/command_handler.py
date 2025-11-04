@@ -1,5 +1,6 @@
 import config
 import time
+from handlers.arduino_handler import send_command_to_arduino
 from ui.terminal import draw_terminal
 from ui.browser import draw_browser
 import pygame
@@ -184,6 +185,7 @@ def run_exploit(state, exploit_cmd):
                     # Defensive: ensure progression state reflects router hacked
                     try:
                         state.current_stage_index = max(state.current_stage_index, 0)
+                        send_command_to_arduino("A") 
                     except Exception:
                         pass
         

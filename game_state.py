@@ -2,6 +2,7 @@ import pygame
 from config import WIDTH, HEIGHT
 import ctypes
 from handlers import dialog_handler
+from handlers.arduino_handler import send_command_to_arduino
 
 class GameState:
     def __init__(self):
@@ -204,7 +205,7 @@ class GameState:
             }
         ]
     # Start at the router login page so the flow begins with the router
-        self.go_to_page_by_id("giggle_admin") # empty page at start
+        self.go_to_page_by_id("empty") # empty page at start
 
         # Clock
         self.clock = pygame.time.Clock()
@@ -230,6 +231,9 @@ class GameState:
         self.login_button_rect = pygame.Rect(0, 0, 340, 36)
 
         self.wifi_connected = False
+
+        # arduino
+        send_command_to_arduino("1")
         
         # Initialize layout
         from ui.layout import update_layout
@@ -300,6 +304,7 @@ class GameState:
                 if pygame.time.get_ticks() - self.current_page["bypass_time"] > 2000:
                     self.current_page["show_admin_panel"] = True
                     self.go_to_page_by_id("route_simple_admin")  # Automatically switch to admin page
+                    send_command_to_arduino("B")
 
     def first_dialog(self):
         dialog_handler.start_dialog(self, [

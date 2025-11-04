@@ -1,5 +1,6 @@
 from config import USERNAME_LIGHT, PASSWORD_LIGHT, USERNAME_GIGGLE, PASSWORD_GIGGLE
 from handlers import dialog_handler
+from handlers.arduino_handler import send_command_to_arduino
 
 def login_attempt(state):
     """Handle login attempt in browser (per page)"""
@@ -17,6 +18,7 @@ def login_attempt(state):
             page["login_failed"] = False
             # navigate to admin panel
             state.go_to_page_by_id("smart_light_admin")
+            send_command_to_arduino("D")
             dialog_handler.start_dialog(state, [
                 f"We've reached the smart light hub admin panel.",
                 "From the light usage history we can see that during week days they get up at 7.",
@@ -35,6 +37,7 @@ def login_attempt(state):
             page["bypassed"] = True
             page["login_failed"] = False
             state.go_to_page_by_id("giggle_admin")
+            send_command_to_arduino("F")
             dialog_handler.start_dialog(state, [
                 "Successful login to Giggle HomePod.",
                 "Accessing Giggle admin panel now."
