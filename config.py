@@ -143,6 +143,8 @@ DEVICE_STAGE_MAP = {
     "routesimple": 0,
     "fridge": 3,
     "homepod": 4,
+    "lock": 5,
+    "door": 5,
 }
 
 USERNAME_LIGHT = "john"

@@ -234,6 +234,20 @@ def handle_mouse(state, event):
                                     "Maybe we can use the password we found for the camera ?",
                                     "It's on the terminal history if you need to check."
                                 ], char_delay=20)
+                        elif "lock" in dev_name.lower() or "door" in dev_name.lower():
+                            # Smart Lock device - launch minigame
+                            from minigames import smart_lock
+                            lock_game = smart_lock.get_smart_lock_game()
+                            if lock_game:
+                                lock_game.start()
+                                dialog_handler.start_dialog(state, [
+                                    "Here's the Smart Lock!",
+                                    "We know the PIN is 3001 from the HomePod recording.",
+                                    "Enter the PIN to unlock the door and complete the mission!"
+                                ], char_delay=20)
+                            send_command_to_arduino("7")
+                            # Update progression when accessing lock
+                            state.current_stage_index = max(state.current_stage_index, 5)
                         else:
                             # For other devices, create a new page entry and go there
                             new_url = f"http://{item['ip']}/"
