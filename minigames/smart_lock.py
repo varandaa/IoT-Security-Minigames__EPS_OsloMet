@@ -1,5 +1,6 @@
 import pygame
 import os
+from handlers import arduino_handler
 from config import TEXT_COLOR, BUTTON_BG, BUTTON_TEXT
 
 class SmartLockMinigame:
@@ -292,6 +293,7 @@ class SmartLockMinigame:
         
         # If won, show victory message
         if self.won:
+            arduino_handler.send_command_to_arduino("G")
             # Position messages within the keypad panel
             victory_y = panel_y + panel_height - 90
             victory_text = self.title_font.render("DOOR UNLOCKED", True, (67, 160, 71))

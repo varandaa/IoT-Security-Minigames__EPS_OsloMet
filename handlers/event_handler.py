@@ -239,13 +239,13 @@ def handle_mouse(state, event):
                             from minigames import smart_lock
                             lock_game = smart_lock.get_smart_lock_game()
                             if lock_game:
+                                send_command_to_arduino("7")
                                 lock_game.start()
                                 dialog_handler.start_dialog(state, [
                                     "Here's the Smart Lock!",
                                     "We know the PIN is 3001 from the HomePod recording.",
                                     "Enter the PIN to unlock the door and complete the mission!"
                                 ], char_delay=20)
-                            send_command_to_arduino("7")
                             # Update progression when accessing lock
                             state.current_stage_index = max(state.current_stage_index, 5)
                         else:
