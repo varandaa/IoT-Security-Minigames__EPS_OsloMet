@@ -174,11 +174,18 @@ def handle_mouse(state, event):
 
                         # Only allow access to the NEXT stage (not previous stages)
                         # required_stage must equal current_stage_index + 1
-                        if required_stage != (state.current_stage_index + 1):
+                        if required_stage > (state.current_stage_index + 1):
                             # blocked: show dialog explaining the order
                             dialog_handler.start_dialog(state, [
                                 f"You can't access {dev_name} yet.",
                                 "Let's focus on the current objective and follow the order."
+                            ], char_delay=20)
+                            return
+                        elif required_stage < (state.current_stage_index + 1):
+                            # blocked: show dialog explaining the order
+                            dialog_handler.start_dialog(state, [
+                                f"You already accessed {dev_name}.",
+                                "Continue to the next objective."
                             ], char_delay=20)
                             return
 
