@@ -82,21 +82,22 @@ def draw_browser(state):
 def draw_next_page_button(state):
     """Draw a button over the video to go to the next page (router login)."""
     browser_rect = state.browser_rect
-    # Button size and position (centered horizontally, near bottom)
-    btn_width = 220
-    btn_height = 48
-    btn_x = browser_rect.x + (browser_rect.width - btn_width) // 2
-    # Place above bottom, but below video
-    topbar_height = max(40, int(state.HEIGHT * 0.04)) + 16
-    btn_y = browser_rect.y + topbar_height + browser_rect.height - topbar_height - btn_height - 32
+    # Standardised button: bottom-left, same size as other router-admin buttons
+    btn_width = 180
+    btn_height = 36
+    btn_padding = 20
+    btn_x = browser_rect.right - btn_padding - btn_width
+    btn_y = browser_rect.bottom - btn_padding - btn_height
     btn_rect = pygame.Rect(btn_x, btn_y, btn_width, btn_height)
-    # Draw button
+    # Draw button (standardised: bottom-left)
     pygame.draw.rect(state.screen, BUTTON_BG, btn_rect, border_radius=8)
     pygame.draw.rect(state.screen, (160, 160, 160), btn_rect, 2, border_radius=8)
-    btn_text = state.ui_font.render("Go to Router Admin Page", True, BUTTON_TEXT)
+    btn_text = state.ui_font.render("Back to Router Admin", True, BUTTON_TEXT)
     tx = btn_rect.x + (btn_rect.width - btn_text.get_width()) // 2
     ty = btn_rect.y + (btn_rect.height - btn_text.get_height()) // 2
     state.screen.blit(btn_text, (tx, ty))
+    # expose a common rect used by handlers
+    state.router_admin_button_rect = btn_rect
 
 def draw_video_feed(state):
     ret, frame = cap.read()
@@ -644,7 +645,7 @@ def draw_smart_fridge(state):
     temp_text = state.ui_font.render("Temperature: 4°C | Humidity: 65%", True, (150, 150, 150))
     state.screen.blit(temp_text, (state.browser_rect.x + padding, inventory_y))
     
-    # Back to RouteSimple admin button (bottom-right corner)
+    # Back to Router Admin button (standard: bottom-left)
     btn_width = 180
     btn_height = 36
     btn_padding = 20
@@ -657,8 +658,8 @@ def draw_smart_fridge(state):
     tx = back_rect.x + (back_rect.width - back_text.get_width()) // 2
     ty = back_rect.y + (back_rect.height - back_text.get_height()) // 2
     state.screen.blit(back_text, (tx, ty))
-    # store rect for click handling
-    state.smart_fridge_back_button_rect = back_rect
+    # store shared rect for click handling
+    state.router_admin_button_rect = back_rect
 
 def draw_smart_light_login(state):
     """Draw a simple smart light hub login page."""
@@ -698,20 +699,21 @@ def draw_smart_light_admin(state):
     title = state.title_font.render("Light Hub — Admin", True, TEXT_COLOR)
     state.screen.blit(title, (state.browser_rect.x + padding, start_y))
 
-    # Back button to RouteSimple admin (stored on state for click handling)
+    # Back to Router Admin button (standard: bottom-left)
     btn_w = 180
     btn_h = 36
-    bx = state.browser_rect.right - padding - btn_w
-    by = start_y
+    btn_padding = 20
+    bx = state.browser_rect.right - btn_padding - btn_w
+    by = state.browser_rect.bottom - btn_padding - btn_h
     back_btn_rect = pygame.Rect(bx, by, btn_w, btn_h)
     pygame.draw.rect(state.screen, BUTTON_BG, back_btn_rect, border_radius=6)
     pygame.draw.rect(state.screen, (120, 120, 120), back_btn_rect, 1, border_radius=6)
-    back_text = state.ui_font.render("Back to RouteSimple", True, BUTTON_TEXT)
+    back_text = state.ui_font.render("Back to Router Admin", True, BUTTON_TEXT)
     tx = back_btn_rect.x + (back_btn_rect.width - back_text.get_width()) // 2
     ty = back_btn_rect.y + (back_btn_rect.height - back_text.get_height()) // 2
     state.screen.blit(back_text, (tx, ty))
-    # expose rect so event handler can detect clicks
-    state.smart_light_back_button_rect = back_btn_rect
+    # expose shared rect so event handler can detect clicks
+    state.router_admin_button_rect = back_btn_rect
 
     y = start_y + 100
 
@@ -928,7 +930,7 @@ def draw_giggle_admin(state):
     desc = state.ui_font.render("Latest conversation recording from HomePod", True, (120, 120, 120))
     state.screen.blit(desc, (state.browser_rect.x + padding + 20, y))
     
-    # Back to RouteSimple admin button (bottom-right corner)
+    # Back to Router Admin button (standard: bottom-left)
     btn_width = 180
     btn_height = 36
     btn_padding = 20
@@ -941,5 +943,5 @@ def draw_giggle_admin(state):
     tx = back_rect.x + (back_rect.width - back_text.get_width()) // 2
     ty = back_rect.y + (back_rect.height - back_text.get_height()) // 2
     state.screen.blit(back_text, (tx, ty))
-    # store rect for click handling
-    state.giggle_back_button_rect = back_rect
+    # store shared rect for click handling
+    state.router_admin_button_rect = back_rect

@@ -240,48 +240,19 @@ def handle_mouse(state, event):
                             state.go_to_page_by_url(new_url)
 
                         return
-        elif page["url"] == "http://192.168.1.102/video":
-            btn_width = 220
-            btn_height = 48
-            btn_x = state.browser_rect.x + (state.browser_rect.width - btn_width) // 2
-            topbar_height = max(40, int(state.HEIGHT * 0.04)) + 16
-            btn_y = state.browser_rect.y + state.browser_rect.height - btn_height - 32
-            btn_rect = pygame.Rect(btn_x, btn_y, btn_width, btn_height)
-            if btn_rect.collidepoint(event.pos):
-                # if needed, we could release the camera via cap.release()
-                cap.release()
-                state.go_to_page_by_id("route_simple_admin")  # go to "http://192.168.1.1/admin"
-                dialog_handler.start_dialog(state, [
-                                f"We're back on the admin panel.",
-                                "How about we try to hack the smart lamp now?",
-                                "If we can see the time it usually turns on and off, we can track their schedule.",
-                                "Know the time they wake up...",
-                                "The time they leave for work..."
-                            ], char_delay=20)
-        # Smart Light admin: handle Back to RouteSimple button
-        elif page.get("id") == "smart_light_admin":
-            back_rect = getattr(state, "smart_light_back_button_rect", None)
-            if back_rect and back_rect.collidepoint(event.pos):
-                # Navigate back to RouteSimple admin
-                state.go_to_page_by_id("route_simple_admin")
-                dialog_handler.start_dialog(state, [
-                    "We returned to the RouteSimple admin panel.",
-                    "Let's see if the 'Giggle-SmartFridge' has some interesting information for us."
-                ], char_delay=20)
-                return
-        # Smart Fridge: handle Back to RouteSimple button
-        elif page.get("id") == "smart_fridge":
-            back_rect = getattr(state, "smart_fridge_back_button_rect", None)
-            if back_rect and back_rect.collidepoint(event.pos):
-                # Gate: user must have seen the credentials packet first
-                if not state.seen_credentials_packet:
+        # General Router Admin button (shared for many pages)
+        router_btn = getattr(state, "router_admin_button_rect", None)
+        if router_btn and router_btn.collidepoint((mx, my)):
+            # gating rules per page
+            if page.get("id") == "smart_fridge":
+                if not getattr(state, "seen_credentials_packet", False):
                     dialog_handler.start_dialog(state, [
                         "Hold on, you haven't inspected the network packets yet!",
                         "Go back to the terminal and use the 'wireshark' command to sniff the network traffic.",
                         "See if you can find some interesting informations."
                     ], char_delay=20)
                     return
-                
+                # message when allowed
                 state.go_to_page_by_id("route_simple_admin")
                 dialog_handler.start_dialog(state, [
                     "Back on the device list.",
@@ -290,6 +261,38 @@ def handle_mouse(state, event):
                     "Let's check it out!"
                 ], char_delay=20)
                 return
+
+            if page.get("id") == "giggle_admin":
+                if not getattr(state, "listened_to_homepod", False):
+                    dialog_handler.start_dialog(state, [
+                        "Hold on! You haven't listened to the HomePod recording yet.",
+                        "Click the 'Play Recording' button to hear the recording first.",
+                        "It may contain important information you need to gather."
+                    ], char_delay=20)
+                    return
+                state.go_to_page_by_id("route_simple_admin")
+                dialog_handler.start_dialog(state, [
+                    "Now that we know the PIN, let's just access the Smart Lock.",
+                    "This is the last step of our mission.",
+                    "Let's go!"
+                ], char_delay=20)
+                return
+
+            # If coming from camera video, release the camera first
+            if page.get("id") == "camera_video":
+                try:
+                    cap.release()
+                except Exception:
+                    pass
+
+            # Default behaviour: navigate to route admin
+            state.go_to_page_by_id("route_simple_admin")
+            dialog_handler.start_dialog(state, [
+                "We're back on the admin panel.",
+                "How about we try to hack the smart lamp now?",
+                "If we can see the time it usually turns on and off, we can track their schedule.",
+            ], char_delay=20)
+            return
         # Giggle HomePod admin: handle Listen to HomePod button
         elif page.get("id") == "giggle_admin":
             listen_rect = getattr(state, "giggle_listen_button_rect", None)
