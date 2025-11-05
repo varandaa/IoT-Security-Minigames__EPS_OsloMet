@@ -147,12 +147,12 @@ def change_directory(state, cmd):
     else:
         folder = cmd.split(" ")[1]
         if folder == "..":
-            if state.current_folder == "/devices":
+            if state.current_folder == "/root":
                 state.output_lines.append("You can't go back any further!")
             else:
-                state.current_folder = "/devices"
+                state.current_folder = "/root"
                 state.level -= 1
-        elif folder in config.PATH.get("devices"):
+        elif folder in config.PATH.get("root"):
             state.current_folder += "/" + folder
             state.level += 1
         else:
@@ -168,7 +168,7 @@ def run_exploit(state, exploit_cmd):
             state.output_lines.append("[-]Please specify the Wifi network name to crack. Usage: ./fern-wifi-cracker <wifi_name>")
             return
 
-    if exploit in config.PATH.get("devices"):
+    if exploit in config.PATH.get("root"):
         state.output_lines.append("That is a folder. It isn't an exploit!")
     elif exploit in config.PATH.get(state.current_folder.split("/")[state.level]):
         state.output_lines.append("[+]Starting Exploit...")
@@ -176,7 +176,7 @@ def run_exploit(state, exploit_cmd):
         state.output_lines.append("[+]Scanning for the device on the network...")
         wait(state, 3)
         
-        if state.current_folder == "/devices/RouteSimple":
+        if state.current_folder == "/root/RouteSimple":
             # Delegate router exploit handling to the router minigame module
             if state.current_page["id"] != "route_simple_login":
                 dialog_handler.start_dialog(state, [
@@ -196,7 +196,7 @@ def run_exploit(state, exploit_cmd):
                     except Exception:
                         pass
         
-        elif state.current_folder == "/devices/BruteForce" and state.current_page["id"]=="camera_login":
+        elif state.current_folder == "/root/BruteForce" and state.current_page["id"]=="camera_login":
             # Delegate camera bruteforce handling to the camera minigame module
             if (state.current_page["id"] != "camera_login"):
                 print("Already hacked")
@@ -239,7 +239,7 @@ def run_exploit(state, exploit_cmd):
                         "You can find it in the 'BruteForce' folder."
                     ], char_delay=20)
                     state.output_lines.append(f"[-]{exploit} is not effective against this device.")
-        elif state.current_folder == "/devices/Wifi":
+        elif state.current_folder == "/root/Wifi":
             if exploit.startswith("fern-wifi-cracker"):
                 wifi_minigame.on_wifi_crack_attempt(state, exploit_cmd, wait)
         else:

@@ -1,72 +1,11 @@
 PATH = {
-    "devices": [
-        "SuperSmartToaster", "InternetOfFood",
-        "SmartFridge", "CityLightController", "ThermoSenseX",
-        "AutoGarden", "DoorGuardian", "SmartCamPro",
-        "TrafficBeacon", "MediPump", "ParkSensor","RouteSimple", "EnergyMeter",
-        "BruteForce", "Wifi"
+    "root": [
+        "RouteSimple","BruteForce", "Wifi"
     ],
 
     "RouteSimple": [
         "exploit-1.0.2", "exploit-2.3.4", "exploit-0.9.8",
         "exploit-1.0.1u", "exploit-3.0.0a"
-    ],
-
-    "SuperSmartToaster": [
-        "exploit-0.8.1", "exploit-2.2.31", "exploit-1.4.0-beta",
-        "exploit-1.4.0-beta1"
-    ],
-
-    "InternetdOfFood": [
-        "exploit-3.1.0", "exploit-2.0.0-rc1", "exploit-1.1.0",
-        "exploit-1.1.1b", "exploit-0.7.0"
-    ],
-
-    "SmartFridge": [
-        "exploit-2.0.0", "exploit-1.2.3", "exploit-0.7.9",
-        "exploit-3.0.0-rc1"
-    ],
-
-    "CityLightController": [
-        "exploit-4.4.0", "exploit-1.0.0", "exploit-0.3.2"
-    ],
-
-    "ThermoSenseX": [
-        "exploit-0.9.0", "exploit-1.1.7", "exploit-2.2.0"
-    ],
-
-    "AutoGarden": [
-        "exploit-1.5.3", "exploit-0.4.0-beta", "exploit-2.0.1",
-        "exploit-2.0.1a"
-    ],
-
-    "DoorGuardian": [
-        "exploit-3.0.0", "exploit-0.2.5", "exploit-1.7.4"
-    ],
-
-    "SmartCamPro": [
-        "exploit-1.6.0", "exploit-2.10.0", "exploit-0.5.8",
-        "exploit-0.5.8a", "exploit-0.6.1", "exploit-2.10.0b",
-        "exploit-2.11.0"
-    ],
-
-    "TrafficBeacon": [
-        "exploit-0.2.9", "exploit-1.3.3", "exploit-2.1.0"
-    ],
-
-    "MediPump": [
-        "exploit-0.0.9", "exploit-1.0.0-rc2", "exploit-0.8.7",
-        "exploit-0.8.7a", "exploit-0.9.0"
-    ],
-
-    "ParkSensor": [
-        "exploit-0.1.0", "exploit-0.1.1alpha", "exploit-0.2.0",
-        "exploit-0.2.1-rc1"
-    ],
-
-    "EnergyMeter": [
-        "exploit-4.0.0", "exploit-3.2.1", "exploit-3.2.1a",
-        "exploit-2.9.9-beta"
     ],
 
     "BruteForce" : [
@@ -125,11 +64,10 @@ FAILED_ALERT_BG = (255, 95, 86)          # green alert for bypassed login
 BORDER = (180, 180, 180)          # generic light border
 DARK_TERMINAL = (20, 20, 20)      # used for other browser areas
 
-# Define progression order (folders under /devices). Index 0 is the first stage.
+# Define progression order (folders under /root). Index 0 is the first stage.
 STAGE_ORDER = [
     "RouteSimple",  # router
     "BruteForce",   # camera (brute force folder in this project)
-    "iPhone",       # example next stage (iPhone-John)
     "Other"         # fallback for remaining devices
 ]
 

@@ -214,7 +214,7 @@ class SmartLockMinigame:
         pygame.draw.rect(self.screen, (50, 50, 55), logo_bg, border_radius=10)
         pygame.draw.rect(self.screen, (120, 120, 125), logo_bg, 2, border_radius=10)
         
-        yale_text = self.title_font.render("SS", True, (220, 220, 220))
+        yale_text = self.title_font.render("LOCK", True, (220, 220, 220))
         yale_rect = yale_text.get_rect(center=(self.width // 2, logo_y))
         self.screen.blit(yale_text, yale_rect)
         

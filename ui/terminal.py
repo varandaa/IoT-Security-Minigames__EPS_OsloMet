@@ -258,7 +258,7 @@ def get_help_dialog_for_page(state):
         # On router login page
         return [
             "You're looking at the router's login page!",
-            "If you're still inside the 'Wifi' folder type 'cd ..' to go back to the 'devices' folder."
+            "If you're still inside the 'Wifi' folder type 'cd ..' to go back to the 'root' folder."
             "By typing 'ls' you can see folders for different devices and tools.",
             "This is a RouteSimple router - check the version in the browser.",
             "Navigate to the 'RouteSimple' folder: 'cd RouteSimple'",

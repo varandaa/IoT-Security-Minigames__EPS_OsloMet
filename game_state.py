@@ -33,7 +33,7 @@ class GameState:
         self.cursor_blink_speed = 500
         
         # File system
-        self.current_folder = "/devices"
+        self.current_folder = "/root"
         self.level = 1
 
         # Browser global state (cursor, focus)
