@@ -132,11 +132,13 @@ def show_help(state):
     state.output_lines.append("  help  - Show this message")
     state.output_lines.append("  ls  - List the files in this folder")
     state.output_lines.append("  ./{exploit_name}  - Run an exploit")
-    state.output_lines.append("  hydra {wordlist}.txt  - Brute force the camera using the specified wordlist")
+    state.output_lines.append("  hydra {wordlist}.txt  - Brute force the camera using the specified")
+    state.output_lines.append("                          wordlist")
     state.output_lines.append("  fern-wifi-cracker {network_name}  - Crack a WiFi network")
     state.output_lines.append("  clear  - Clear the screen (can also use CTRL+L)")
     state.output_lines.append("  nmcli  - Scan for nearby Wifi networks and open web page to view them")
-    state.output_lines.append("  wireshark - Open a packet inspector in the terminal to inspect network traffic")
+    state.output_lines.append("  wireshark - Open a packet inspector in the terminal to inspect network")
+    state.output_lines.append("              traffic")
 
 def list_files(state):
     """List files in current directory"""

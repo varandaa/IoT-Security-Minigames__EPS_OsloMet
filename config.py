@@ -52,6 +52,7 @@ BYPASS_ALERT_BG = (60, 180, 60)          # green alert for bypassed login
 FAILED_ALERT_BG = (255, 95, 86)          # green alert for bypassed login
 BORDER = (180, 180, 180)          # generic light border
 DARK_TERMINAL = (20, 20, 20)      # used for other browser areas
+ORANGE = (255, 165, 0)           # color for terminal output lines
 
 # Define progression order (folders under /root). Index 0 is the first stage.
 STAGE_ORDER = [

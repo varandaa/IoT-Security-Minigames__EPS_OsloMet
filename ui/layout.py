@@ -2,7 +2,9 @@ import pygame
 
 def create_fonts(state):
     """Create fonts sized relative to window height for basic scaling."""
-    mono_size = max(10, int(state.HEIGHT * 0.014))
+    # Increase monospaced terminal font size so terminal text is easier to read.
+    # Keep it proportional to window height but with a larger multiplier.
+    mono_size = max(12, int(state.HEIGHT * 0.020))
     ui_size = max(12, int(state.HEIGHT * 0.016))
     title_size = max(16, int(state.HEIGHT * 0.022))
     state.mono_font = pygame.font.Font(pygame.font.match_font('dejavusansmono'), mono_size)

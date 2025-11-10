@@ -1,6 +1,6 @@
 import pygame
 import os
-from config import BLACK, GREEN, BORDER, USERNAME_LIGHT, PASSWORD_LIGHT
+from config import BLACK, GREEN, BORDER, USERNAME_LIGHT, PASSWORD_LIGHT, TEXT_COLOR, ORANGE
 
 # Load Clippy image
 _clippy_image = None
@@ -31,22 +31,49 @@ def draw_terminal(state):
                      (state.terminal_rect.right, 0), 
                      (state.terminal_rect.right, state.HEIGHT), 2)
     
-    # Output lines
+    # Output lines (from the system) — render in orange
     y = 10
     line_h = state.mono_font.get_linesize()
     max_lines = max(1, (state.terminal_rect.height - 40) // line_h)
-    
+
     for line in state.output_lines[-max_lines:]:
-        rendered = state.mono_font.render(line, True, GREEN)
-        state.screen.blit(rendered, (state.terminal_rect.x + 10, y))
+        # If this line is a user-entered command it is stored as '/root> <cmd>'
+        # — render those lines in green so historical commands remain green.
+        try:
+            is_user_cmd = isinstance(line, str) and line.startswith("/root> ")
+        except Exception:
+            is_user_cmd = False
+
+        if is_user_cmd:
+            # Split prefix and command to render consistently
+            prefix = "/root> "
+            cmd_text = line[len(prefix):]
+            pref_surf = state.mono_font.render(prefix, True, GREEN)
+            cmd_surf = state.mono_font.render(cmd_text, True, GREEN)
+            state.screen.blit(pref_surf, (state.terminal_rect.x + 10, y))
+            pref_w = state.mono_font.size(prefix)[0]
+            state.screen.blit(cmd_surf, (state.terminal_rect.x + 10 + pref_w, y))
+        else:
+            rendered = state.mono_font.render(line, True, ORANGE)
+            state.screen.blit(rendered, (state.terminal_rect.x + 10, y))
+
         y += line_h
-    
-    # Input line with cursor
-    prompt = "/root> " + state.input_text
+
+    # Input line with cursor — render prompt prefix in normal text color
+    # and the user-typed text in green so it's clearly distinguishable.
+    prefix = "/root> "
+    user_text = state.input_text
     if state.cursor_visible:
-        prompt += "_"
-    rendered_input = state.mono_font.render(prompt, True, GREEN)
-    state.screen.blit(rendered_input, (state.terminal_rect.x + 10, y))
+        user_text = user_text + "_"
+
+    # Render prefix first, then the user text next to it
+    # Render the prompt prefix in green so the entire prompt (prefix + typed text)
+    # appears in the same color for clarity.
+    prefix_surf = state.mono_font.render(prefix, True, GREEN)
+    state.screen.blit(prefix_surf, (state.terminal_rect.x + 10, y))
+    prefix_w = state.mono_font.size(prefix)[0]
+    input_surf = state.mono_font.render(user_text, True, GREEN)
+    state.screen.blit(input_surf, (state.terminal_rect.x + 10 + prefix_w, y))
     # If packet inspector is active, draw it over the terminal area
     if getattr(state, 'packet_inspector', None) and state.packet_inspector.get('visible'):
         draw_packet_inspector(state)
