@@ -82,6 +82,10 @@ def execute_command(state, cmd):
         list_files(state)
     elif cmd.split(" ")[0] == "cd":
         change_directory(state, cmd)
+    elif cmd.split(" ")[0] == "hydra":
+        run_hydra(state, cmd)
+    elif cmd.split(" ")[0] == "fern-wifi-cracker":
+        run_fern_wifi_cracker(state, cmd)
     elif cmd[:2] == "./":
         run_exploit(state, cmd[2:])
     elif cmd == "clear":
@@ -102,7 +106,7 @@ def execute_command(state, cmd):
             wifi_minigame.on_wifi_analyser(state, cmd)
     elif cmd == "wireshark":
         # Open a simple terminal-side packet inspector with sample packets
-        # Build a few sample packets; one contains Giggle credentials
+        # Build a few sample packets; one contains Giggle credentialsdevices
         # Attach inspector state to game state
         if state.current_page["id"] != "smart_fridge":
                 dialog_handler.start_dialog(state, [
@@ -127,122 +131,120 @@ def show_help(state):
     state.output_lines.append("Available commands:")
     state.output_lines.append("  help  - Show this message")
     state.output_lines.append("  ls  - List the files in this folder")
-    state.output_lines.append("  cd {directory_name}  - Change folder to the desired one.")
-    state.output_lines.append("                         Use 'cd ..' to go back to previous directory.")
-    state.output_lines.append("                         You can see the folder you're currently in behind the '>'")
     state.output_lines.append("  ./{exploit_name}  - Run an exploit")
+    state.output_lines.append("  hydra {wordlist}.txt  - Brute force the camera using the specified wordlist")
+    state.output_lines.append("  fern-wifi-cracker {network_name}  - Crack a WiFi network")
     state.output_lines.append("  clear  - Clear the screen (can also use CTRL+L)")
     state.output_lines.append("  nmcli  - Scan for nearby Wifi networks and open web page to view them")
     state.output_lines.append("  wireshark - Open a packet inspector in the terminal to inspect network traffic")
 
 def list_files(state):
     """List files in current directory"""
-    for file in config.PATH.get(state.current_folder.split("/")[state.level]):
+    for file in config.PATH.get("root", []):
         state.output_lines.append(file)
 
 def change_directory(state, cmd):
-    """Change current directory"""
-    if len(cmd.split(" ")) == 1:
-        state.output_lines.append("You must specify the folder you wish to go to.")
+    """Placeholder - cd command disabled"""
+    state.output_lines.append("The 'cd' command is disabled. All files are in the root directory.")
+
+def run_hydra(state, cmd):
+    """Run hydra brute force attack on the camera"""
+    # Parse wordlist from command
+    parts = cmd.split(" ")
+    if len(parts) < 2:
+        state.output_lines.append("[-]Please specify a wordlist. Usage: hydra <wordlist>")
+        return
+    
+    wordlist = parts[1]
+    available_exploits = config.PATH.get("root", [])
+    
+    # Camera brute force
+    if state.current_page["id"] != "camera_login":
+        dialog_handler.start_dialog(state, [
+            "The camera has already been hacked!",
+            "There's no need to run this exploit again.",
+            "Let's move on to the next target."
+        ], char_delay=20)
     else:
-        folder = cmd.split(" ")[1]
-        if folder == "..":
-            if state.current_folder == "/root":
-                state.output_lines.append("You can't go back any further!")
-            else:
-                state.current_folder = "/root"
-                state.level -= 1
-        elif folder in config.PATH.get("root"):
-            state.current_folder += "/" + folder
-            state.level += 1
-        else:
-            state.output_lines.append(f"{folder} isn't a folder.")
+        if wordlist not in available_exploits:
+            state.output_lines.append(f"[-]Wordlist '{wordlist}' not found.")
+            return
+        
+        state.output_lines.append("[+]SmartCamPro camera has been found! (IP: 192.168.1.102)")
+
+        # Simulate brute force attack
+        state.current_page["is_being_brute_forced"] = True
+        state.current_page["username"] = "*******"
+        state.current_page["password"] = "*******"
+        wait(state, 2)
+
+        state.output_lines.append("[+]Starting brute force attack using hydra...")
+
+        # Animate trying combinations (1000 by default over ~3s)
+        animate_bruteforce(state, total=random.randint(1000,1500), duration=3.0, prefix="Trying credentials:")
+        
+        if wordlist != "common-credentials.txt":
+            dialog_handler.start_dialog(state, [
+                f"The wordlist '{wordlist}' doesn't seem to have the right credentials.",
+                "Try using 'common-credentials.txt' instead. It should have what we need."
+            ], char_delay=20)
+            state.output_lines.append(f"[-]The wordlist '{wordlist}' doesn't seem to have the right credentials.")
+            return
+
+        # Use camera minigame handler
+        camera_minigame.on_bruteforce_success(state, "hydra")
+
+def run_fern_wifi_cracker(state, cmd):
+    """Run fern-wifi-cracker to crack a WiFi network"""
+    # Parse network name from command
+    parts = cmd.split(" ")
+    if len(parts) < 2:
+        state.output_lines.append("[-]Please specify the WiFi network name to crack. Usage: fern-wifi-cracker <network_name>")
+        return
+    
+    network_name = parts[1]
+    
+    # Call the wifi minigame handler with the full command
+    wifi_minigame.on_wifi_crack_attempt(state, cmd, wait)
 
 def run_exploit(state, exploit_cmd):
     """Run an exploit"""
     exploit = exploit_cmd.split(" ")[0]
 
-    if exploit == "fern-wifi-cracker": # check if wifi name provided
-        command = exploit_cmd.split(" ")
-        if len(command) == 1:
-            state.output_lines.append("[-]Please specify the Wifi network name to crack. Usage: ./fern-wifi-cracker <wifi_name>")
-            return
+    available_exploits = config.PATH.get("root", [])
+    
+    if exploit not in available_exploits:
+        state.output_lines.append(f"{exploit} doesn't exist")
+        return
 
-    if exploit in config.PATH.get("root"):
-        state.output_lines.append("That is a folder. It isn't an exploit!")
-    elif exploit in config.PATH.get(state.current_folder.split("/")[state.level]):
-        state.output_lines.append("[+]Starting Exploit...")
-        wait(state, 1)
-        state.output_lines.append("[+]Scanning for the device on the network...")
-        wait(state, 3)
-        
-        if state.current_folder == "/root/RouteSimple":
-            # Delegate router exploit handling to the router minigame module
-            if state.current_page["id"] != "route_simple_login":
-                dialog_handler.start_dialog(state, [
-            "We already hacked the router!",
-            "There is no need need to run these exploits again.",
-            "Let's search for my 'BruteForce' folder and hack the Camera.",
-            "Remember 'cd ..' to go to the previous directory"
-        ], char_delay=20)
-                pass
-            else:
-                success = router_minigame.on_exploit_attempt(state, exploit)
-                if success:
-                    # Defensive: ensure progression state reflects router hacked
-                    try:
-                        state.current_stage_index = max(state.current_stage_index, 0)
-                        send_command_to_arduino("A") 
-                    except Exception:
-                        pass
-        
-        elif state.current_folder == "/root/BruteForce" and state.current_page["id"]=="camera_login":
-            # Delegate camera bruteforce handling to the camera minigame module
-            if (state.current_page["id"] != "camera_login"):
-                print("Already hacked")
-            else:
-                if exploit == "hydra":
-                    wordlist = exploit_cmd.split(" ")[1]
-                    if wordlist not in config.PATH.get("BruteForce"):
-                        state.output_lines.append(f"[-]Wordlist '{wordlist}' not found in this folder.")
-                        return
-                    
-                    state.output_lines.append("[+]SmartCamPro camera has been found! (IP: 192.168.1.102)")
-
-                    # Simulate brute force attack
-                    state.current_page["is_being_brute_forced"] = True
-                    state.current_page["username"] = "*******"
-                    state.current_page["password"] = "*******"
-                    wait(state, 2)
-
-                    state.output_lines.append("[+]Starting brute force attack using " + exploit + "...")
-
-                    # Animate trying combinations (1000 by default over ~3s)
-                    animate_bruteforce(state, total=random.randint(1000,1500), duration=3.0, prefix="Trying credentials:")
-                    
-                    if wordlist != "common-credentials.txt":
-                        dialog_handler.start_dialog(state, [
-                            f"The wordlist '{wordlist}' doesn't seem to have the right credentials.",
-                            "Try using 'common-credentials.txt' instead. It should have what we need."
-                        ], char_delay=20)
-                        state.output_lines.append(f"[-]The wordlist '{wordlist}' doesn't seem to have the right credentials.")
-                        return
-
-                    # Use camera minigame handler
-                    camera_minigame.on_bruteforce_success(state, exploit)
-                else:
-                    dialog_handler.start_dialog(state, [
-                        f"{exploit} is not effective against this device.",
-                        "You should try using 'hydra' to brute force the camera login.",
-                        "With some wordlists, it should be possible to get in.",
-                        "Try ./hydra <wordlist>.",
-                        "You can find it in the 'BruteForce' folder."
-                    ], char_delay=20)
-                    state.output_lines.append(f"[-]{exploit} is not effective against this device.")
-        elif state.current_folder == "/root/Wifi":
-            if exploit.startswith("fern-wifi-cracker"):
-                wifi_minigame.on_wifi_crack_attempt(state, exploit_cmd, wait)
+    state.output_lines.append("[+]Starting Exploit...")
+    wait(state, 1)
+    state.output_lines.append("[+]Scanning for the device on the network...")
+    wait(state, 3)
+    
+    # Determine which exploit to run based on exploit name
+    if exploit.startswith("exploit-"):
+        # Router exploits
+        if state.current_page["id"] != "route_simple_login":
+            dialog_handler.start_dialog(state, [
+                "We already hacked the router!",
+                "There is no need need to run these exploits again.",
+                "Let's try to hack the Camera next.",
+                "Look for the 'hydra' tool!"
+            ], char_delay=20)
         else:
-            state.output_lines.append("[-]This device wasn't found on the network. What is the device you're trying to attack?")
+            success = router_minigame.on_exploit_attempt(state, exploit)
+            if success:
+                # Defensive: ensure progression state reflects router hacked
+                try:
+                    state.current_stage_index = max(state.current_stage_index, 0)
+                    send_command_to_arduino("A") 
+                except Exception:
+                    pass
+    
+    elif exploit in ["medusa", "ncrack", "patator", "crowbar", "aircrack-ng", "reaver", "bully", "wifite"]:
+        # Other exploits not implemented yet
+        state.output_lines.append(f"[-]{exploit} is not effective for the current target.")
+        state.output_lines.append("Try using other available tools.")
     else:
-        state.output_lines.append(f"{exploit} doesn't exist in this folder")
+        state.output_lines.append(f"[-]Unknown exploit: {exploit}")

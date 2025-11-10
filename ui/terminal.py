@@ -42,7 +42,7 @@ def draw_terminal(state):
         y += line_h
     
     # Input line with cursor
-    prompt = state.current_folder + "> " + state.input_text
+    prompt = "/root> " + state.input_text
     if state.cursor_visible:
         prompt += "_"
     rendered_input = state.mono_font.render(prompt, True, GREEN)
@@ -258,12 +258,10 @@ def get_help_dialog_for_page(state):
         # On router login page
         return [
             "You're looking at the router's login page!",
-            "If you're still inside the 'Wifi' folder type 'cd ..' to go back to the 'root' folder."
-            "By typing 'ls' you can see folders for different devices and tools.",
-            "This is a RouteSimple router - check the version in the browser.",
-            "Navigate to the 'RouteSimple' folder: 'cd RouteSimple'",
-            "Look for the exploit matching the router's version.",
-            "Run it with './{exploit-name}' while in the RouteSimple folder.",
+            "Check the version in the browser - it should match an exploit in the folder.",
+            "Type 'ls' to see the exploits accessible to you.",
+            "Look for an exploit that matches the router's version.",
+            "Run it with './{exploit-name}'",
             "Once exploited, you'll bypass the login!",
         ]
     elif page_id == "route_simple_admin":
@@ -279,10 +277,10 @@ def get_help_dialog_for_page(state):
         return [
             "You're at the security camera login!",
             "This requires a brute force attack to crack the password.",
-            "Navigate to my 'BruteForce' folder and take a look at the available wordlists.",
-            "Try using the brute-force tool 'hydra' with the different wordlists until we get the right credentials",
-            "You can do so by typing './hydra {wordlist_name}'.",
-            "Be patient - you might have to try different wordlists to guess the credentials.",
+            "You'll need to use the 'hydra' brute forcing tool.",
+            "Try using different wordlists to guess the credentials.",
+            "Use 'hydra {wordlist_name}.txt' to attempt the brute force.",
+            "Common wordlists are available in the files and end in '.txt'. and you can see the available ones by typing 'ls'",
         ]
     elif page_id == "camera_video":
         # Camera feed or camera is bypassed
@@ -298,8 +296,8 @@ def get_help_dialog_for_page(state):
         return [
             "You're viewing available WiFi networks.",
             "John_Home_Wifi looks like the most interesting one, and it probably belongs to this home.",
-            "My Wi-Fi cracking tools are in the 'Wifi' folder. My favourite one is 'fern-wifi-cracker'",
-            "Run the command './fern-wifi-cracker {network_name}' while in the 'WiFi' folder to crack the WiFi!",
+            "Use the 'fern-wifi-cracker' tool from the root folder to crack the WiFi.",
+            "Run 'fern-wifi-cracker {wifi_name}' to crack the WiFi!",
             "After that, we'll be able to connect to the WiFi and try to hack the devices inside."
         ]
     elif page_id == "smart_light_login":
@@ -342,7 +340,6 @@ def get_help_dialog_for_page(state):
             "You're making incredible progress!",
             "Continue exploring the network for more devices.",
             "Each IoT device has unique vulnerabilities.",
-            "Use 'ls' and 'cd' to navigate the file system.",
             "Execute exploits to gain access to each device.",
             "Remember: real hackers always think creatively!",
         ]

@@ -301,7 +301,7 @@ class GameState:
         # Check if we should show admin panel (2 seconds after bypass) for current page
         if self.current_page["id"] == "route_simple_login":
             if self.current_page["bypassed"] and not self.current_page["show_admin_panel"]:
-                if pygame.time.get_ticks() - self.current_page["bypass_time"] > 2000:
+                if pygame.time.get_ticks() - self.current_page["bypass_time"] > 4000:
                     self.current_page["show_admin_panel"] = True
                     self.go_to_page_by_id("route_simple_admin")  # Automatically switch to admin page
                     send_command_to_arduino("B")
@@ -311,7 +311,7 @@ class GameState:
             "Hello there! Welcome to your hacking terminal.",
             "Your goal is to hack into various IoT devices on this network and ultimately get into the house.",
             "You can type 'help' to display a list of useful commands.",
-            "Like 'ls' to list the contents of the folder you're in and 'cd' to go inside a different folder",
+            "Like 'ls' to see the files you have access to.",
             "First you will need to get into the Wifi.",
             "The first step is to use the wifi-analyser tool to find nearby networks.",
             "Start by typing the 'nmcli' command.",

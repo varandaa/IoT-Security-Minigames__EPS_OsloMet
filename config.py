@@ -1,19 +1,8 @@
 PATH = {
     "root": [
-        "RouteSimple","BruteForce", "Wifi"
-    ],
-
-    "RouteSimple": [
         "exploit-1.0.2", "exploit-2.3.4", "exploit-0.9.8",
-        "exploit-1.0.1u", "exploit-3.0.0a"
-    ],
-
-    "BruteForce" : [
-        "hydra", "medusa", "ncrack", "patator", "crowbar", "combo-list.txt", "common-credentials.txt", "common-user-passwords.txt"
-    ],
-    
-    "Wifi": [
-        "aircrack-ng", "reaver", "bully", "fern-wifi-cracker", "wifite"
+        "exploit-1.0.1u", "exploit-3.0.0a",
+        "combo-list.txt", "common-credentials.txt", "common-user-passwords.txt",
     ]
 }
 

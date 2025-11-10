@@ -39,8 +39,9 @@ def login_attempt(state):
             state.go_to_page_by_id("giggle_admin")
             send_command_to_arduino("F")
             dialog_handler.start_dialog(state, [
-                "Successful login to Giggle HomePod.",
-                "Accessing Giggle admin panel now."
+                "We managed to access the HomePod admin panel!",
+                "We can see there's an audio recording stored on the device.",
+                "Press the button to listen the recording, it may contain important information."
             ], char_delay=20)
             # promote progression a bit (arbitrary stage)
             state.current_stage_index = max(state.current_stage_index, 4)

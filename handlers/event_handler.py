@@ -53,7 +53,7 @@ def handle_keyboard(state, event):
                 state.command_history.append(cmd)
             # reset any history browsing
             state.history_index = None
-            state.output_lines.append(state.current_folder + "> " + state.input_text)
+            state.output_lines.append("/root> " + state.input_text)
             execute_command(state, state.input_text)
             state.input_text = ""
     elif event.key == pygame.K_BACKSPACE:
@@ -219,7 +219,8 @@ def handle_mouse(state, event):
                                 dialog_handler.start_dialog(state, [
                                     f"We've reached the Giggle HomePod login page.",
                                     "We have the Giggle credentials from the wireshark packet we inspected.",
-                                    "Let's use them to login and access the HomePod's admin panel."
+                                    "Let's use them to login and access the HomePod's admin panel.",
+                                    "The credentials were: Username - john112 | Password - John2206_"
                                 ], char_delay=20)
                         # command_handler.change_directory(state, "cd ..")
                         elif "light" in dev_name.lower() or "lamp" in dev_name.lower():
@@ -232,7 +233,7 @@ def handle_mouse(state, event):
                                     "Let's try to bypass its login to access the admin panel.",
                                     "The user often uses the same password multiple times.",
                                     "Maybe we can use the password we found for the camera ?",
-                                    "It's on the terminal history if you need to check."
+                                    "It's in the terminal if you need to check."
                                 ], char_delay=20)
                         elif "lock" in dev_name.lower() or "door" in dev_name.lower():
                             # Smart Lock device - launch minigame
@@ -292,6 +293,15 @@ def handle_mouse(state, event):
                     "Now that we know the PIN, let's just access the Smart Lock.",
                     "This is the last step of our mission.",
                     "Let's go!"
+                ], char_delay=20)
+                return
+
+            if page.get("id") == "smart_light_admin":
+                state.go_to_page_by_id("route_simple_admin")
+                dialog_handler.start_dialog(state, [
+                    "We're back on the admin panel.",
+                    "How about we try to hack the smart fridge now?",
+                    "It may contain some interesting information."
                 ], char_delay=20)
                 return
 

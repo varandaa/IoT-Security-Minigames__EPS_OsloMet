@@ -16,7 +16,7 @@ def on_wifi_analyser(state, tool: str):
     dialog_handler.start_dialog(state, [
         "Great! You've found the Wifi networks.",
         "Now you can try to crack the Wifi password using fern-wifi-cracker.",
-        "To use it, ./fern-wifi-cracker <name of the wifi network>."
+        "To use it, fern-wifi-cracker {name of the wifi network}."
     ], char_delay=20)
 
 def on_wifi_crack_attempt(state, exploit_cmd: str, wait_func):
@@ -52,7 +52,7 @@ def on_wifi_crack_success(state, wifi_name: str):
     send_command_to_arduino("2")
     dialog_handler.start_dialog(state, [
             f"Great! You've cracked the Wifi network '{wifi_name}'.",
-            "Now we're inside the home network."
+            "Now we're inside the home network.",
             "I sent you to the router's login page.",
             "From here, you can access the router's admin panel and take control of the network.",
             "To do so, there is a folder with the same name as the router that contains exploits my Dark Web friends sent me.",

@@ -39,8 +39,8 @@ def on_exploit_attempt(state, exploit: str):
                             "I'm so excited!",
                             "Let's start by trying to brute-force the camera.",
                             "In this attack, we will use a hacking tool that allows us to try millions of username/password combinations against the login form in seconds. "
-                            "We will use a list of the most common credentials used world-wide to try to access this ",
-                            "I think I have a 'BruteForce' directory somewhere..."
+                            "We will use a list of the most common credentials used world-wide to try to access this.",
+                            "Press the 'RealViewCamera-1 URL to access it!"
                         ], char_delay=20)
         except Exception:
             pass
