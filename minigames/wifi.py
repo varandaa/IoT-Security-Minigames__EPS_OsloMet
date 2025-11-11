@@ -43,12 +43,13 @@ def on_wifi_crack_attempt(state, exploit_cmd: str, wait_func):
         else:
             state.output_lines.append(f"[-]Wifi network '{wifi_name}' not found nearby.")
     else:
-        state.output_lines.append("[-]Invalid command format. Use: ./fern-wifi-cracker <wifi_name>")
+        state.output_lines.append("[-]Invalid command format. Use: fern-wifi-cracker <wifi_name>")
 
 def on_wifi_crack_success(state, wifi_name: str):
     """Handle state updates when Wifi cracking succeeds."""
     state.output_lines.append(f"[+]Successfully cracked the Wifi network: {wifi_name}!")
     state.go_to_page_by_id("route_simple_login")
+    state.number_of_hacked_devices = getattr(state, "number_of_hacked_devices", 0) + 1
     send_command_to_arduino("2")
     dialog_handler.start_dialog(state, [
             f"Great! You've cracked the Wifi network '{wifi_name}'.",

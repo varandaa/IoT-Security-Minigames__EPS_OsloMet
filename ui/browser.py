@@ -9,6 +9,28 @@ from handlers import dialog_handler
 from minigames.wifi import wifi_networks
 
 
+def _safe_bottom_button_y(state, btn_height, btn_padding=20):
+    """Return a y coordinate for bottom buttons that stays above the timeline.
+
+    Keeps a small gap so buttons never overlap the timeline drawn at the
+    bottom of the screen.
+    """
+    # Match the timeline sizing used in draw_progress_timeline
+    margin = 24
+    timeline_h = 84
+    # top pixel where the timeline occupies from (exclusive)
+    timeline_top = state.HEIGHT - margin - timeline_h
+
+    # default placement at the bottom of the browser rect
+    default_y = state.browser_rect.bottom - btn_padding - btn_height
+
+    # keep at least 8px gap above the timeline
+    safe_y = min(default_y, timeline_top - btn_height - 8)
+    # ensure we don't place above the browser rect top
+    safe_y = max(safe_y, state.browser_rect.y + 60)
+    return safe_y
+
+
 def draw_browser(state):
     """Draw the browser pane (right side)"""
     # Background
@@ -78,6 +100,11 @@ def draw_browser(state):
     else:
         # Unknown page: show blank or error
         draw_topbar(state, page["url"])
+    # Draw the progression timeline at the bottom of the screen
+    try:
+        draw_progress_timeline(state)
+    except Exception:
+        pass
 
 def draw_next_page_button(state):
     """Draw a button over the video to go to the next page (router login)."""
@@ -87,7 +114,7 @@ def draw_next_page_button(state):
     btn_height = 36
     btn_padding = 20
     btn_x = browser_rect.right - btn_padding - btn_width
-    btn_y = browser_rect.bottom - btn_padding - btn_height
+    btn_y = _safe_bottom_button_y(state, btn_height, btn_padding)
     btn_rect = pygame.Rect(btn_x, btn_y, btn_width, btn_height)
     # Draw button (standardised: bottom-left)
     pygame.draw.rect(state.screen, BUTTON_BG, btn_rect, border_radius=8)
@@ -667,7 +694,7 @@ def draw_smart_fridge(state):
     btn_height = 36
     btn_padding = 20
     btn_x = state.browser_rect.right - btn_padding - btn_width
-    btn_y = state.browser_rect.bottom - btn_padding - btn_height
+    btn_y = _safe_bottom_button_y(state, btn_height, btn_padding)
     back_rect = pygame.Rect(btn_x, btn_y, btn_width, btn_height)
     pygame.draw.rect(state.screen, BUTTON_BG, back_rect, border_radius=6)
     pygame.draw.rect(state.screen, (160, 160, 160), back_rect, 2, border_radius=6)
@@ -677,6 +704,143 @@ def draw_smart_fridge(state):
     state.screen.blit(back_text, (tx, ty))
     # store shared rect for click handling
     state.router_admin_button_rect = back_rect
+
+
+def draw_progress_timeline(state):
+    """Draw a bottom-of-screen timeline with 7 circular icons connected by a line.
+    Icons: wifi, routesimple, camera, light, fridge, giggle, lock.
+    Locked icons are drawn 'grayed' while unlocked ones show color.
+    """
+    surf = state.screen
+    w = state.WIDTH
+    h = state.HEIGHT
+
+    # Timeline layout
+    margin = 24
+    timeline_h = 84
+    y = h - margin - timeline_h // 2
+
+    # Define the slots and associated asset loaders/drawers
+    slots = [
+        {"id": "wifi", "label": "WiFi", "asset": "./assets/wifi.png"},
+        {"id": "route", "label": "Router", "asset": "./assets/routesimple.png"},
+        {"id": "camera", "label": "Camera", "asset": "./assets/camera.png"},
+        {"id": "light", "label": "Light", "asset": "./assets/smart_light_hub.png"},
+        {"id": "fridge", "label": "Fridge", "asset": "./assets/smart-fridge-icon.png"},
+        {"id": "giggle", "label": "Giggle", "asset": "./assets/giggle-logo.png"},
+        {"id": "lock", "label": "Lock", "asset": "./assets/smart-lock.png"},
+    ]
+
+    n = len(slots)
+    # Compute positions evenly spaced across width (with side padding)
+    side_pad = 120
+    usable_w = max(400, w - side_pad * 2)
+    gap = usable_w // (n - 1)
+    start_x = (w - usable_w) // 2
+
+    # Determine unlock state for each slot based on state.number_of_hacked_devices
+    # The timeline shows progress left-to-right; when number_of_hacked_devices >= i+1,
+    # the i-th slot is considered unlocked.
+    hacked_count = getattr(state, "number_of_hacked_devices", 0)
+    unlocked = []
+    for i in range(n):
+        unlocked.append(hacked_count >= (i + 1))
+
+    # Draw base connecting line
+    pts = []
+    for i in range(n):
+        x = start_x + i * gap
+        pts.append((x, y))
+
+    # Line color: light gray for locked segments, green for unlocked transitions
+    for i in range(n - 1):
+        x1, y1 = pts[i]
+        x2, y2 = pts[i + 1]
+        # If both sides unlocked, draw highlighted line
+        if unlocked[i] and unlocked[i + 1]:
+            col = (100, 200, 120)
+            lw = 4
+        else:
+            col = (200, 200, 200)
+            lw = 3
+        pygame.draw.line(surf, col, (x1, y1), (x2, y2), lw)
+
+    # Draw circles and icons
+    radius = 32
+    for i, s in enumerate(slots):
+        x, yy = pts[i]
+        is_unlocked = unlocked[i]
+
+        # Circle background
+        if is_unlocked:
+            circle_bg = (80, 180, 120)
+            border_col = (40, 120, 70)
+        else:
+            circle_bg = (220, 220, 220)
+            border_col = (180, 180, 180)
+
+        pygame.draw.circle(surf, circle_bg, (x, yy), radius)
+        pygame.draw.circle(surf, border_col, (x, yy), radius, 2)
+
+        # Draw icon inside circle
+        icon_rect = pygame.Rect(x - radius + 6, yy - radius + 6, (radius - 6) * 2, (radius - 6) * 2)
+        try:
+            if s.get("type") == "draw_wifi":
+                # draw simple wifi bars
+                bx = icon_rect.x + 6
+                by = icon_rect.y + icon_rect.height - 6
+                for bi in range(3):
+                    bar_w = icon_rect.width - bi * 10
+                    bar_h = 4
+                    bx_off = bx + bi * 5
+                    color = (255, 255, 255) if is_unlocked else (140, 140, 140)
+                    pygame.draw.rect(surf, color, (bx_off, by - bi * 8, bar_w, bar_h), border_radius=2)
+            elif s.get("type") == "draw_lock":
+                # draw a simple padlock
+                lock_col = (255, 255, 255) if is_unlocked else (140, 140, 140)
+                # body
+                body = pygame.Rect(icon_rect.centerx - 12, icon_rect.centery - 6, 24, 20)
+                pygame.draw.rect(surf, lock_col, body, border_radius=4)
+                # shackle
+                pygame.draw.arc(surf, lock_col, (body.x - 8, body.y - 22, body.width + 16, 36), 3.14, 0, 3)
+            else:
+                asset = s.get("asset")
+                if asset:
+                    # load once into state cache
+                    cache = getattr(state, "_timeline_icon_cache", {})
+                    if asset not in cache:
+                        try:
+                            img = pygame.image.load(asset).convert_alpha()
+                            # scale to fit icon_rect
+                            scale = min(icon_rect.width / img.get_width(), icon_rect.height / img.get_height())
+                            img_s = pygame.transform.smoothscale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+                            cache[asset] = img_s
+                        except Exception:
+                            cache[asset] = None
+                        state._timeline_icon_cache = cache
+
+                    img_s = state._timeline_icon_cache.get(asset)
+                    if img_s:
+                        img_rect = img_s.get_rect()
+                        img_rect.center = (x, yy)
+                        if is_unlocked:
+                            surf.blit(img_s, img_rect)
+                        else:
+                            # draw grayscaled by blitting to a temporary surface and tinting
+                            tmp = img_s.copy()
+                            arr = pygame.Surface(tmp.get_size(), pygame.SRCALPHA)
+                            arr.fill((180, 180, 180, 140))
+                            tmp.blit(arr, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+                            surf.blit(tmp, img_rect)
+        except Exception:
+            # if icon drawing fails, draw a letter as fallback
+            txt = state.ui_font.render(s.get("label", "?"), True, (255, 255, 255) if is_unlocked else (120, 120, 120))
+            trect = txt.get_rect(center=(x, yy))
+            surf.blit(txt, trect)
+
+    # Store rects for possible interactivity later
+    state.timeline_points = pts
+    state.timeline_unlocked = unlocked
 
 def draw_smart_light_login(state):
     """Draw a simple smart light hub login page."""
@@ -721,7 +885,7 @@ def draw_smart_light_admin(state):
     btn_h = 36
     btn_padding = 20
     bx = state.browser_rect.right - btn_padding - btn_w
-    by = state.browser_rect.bottom - btn_padding - btn_h
+    by = _safe_bottom_button_y(state, btn_h, btn_padding)
     back_btn_rect = pygame.Rect(bx, by, btn_w, btn_h)
     pygame.draw.rect(state.screen, BUTTON_BG, back_btn_rect, border_radius=6)
     pygame.draw.rect(state.screen, (120, 120, 120), back_btn_rect, 1, border_radius=6)
@@ -952,7 +1116,7 @@ def draw_giggle_admin(state):
     btn_height = 36
     btn_padding = 20
     btn_x = state.browser_rect.right - btn_padding - btn_width
-    btn_y = state.browser_rect.bottom - btn_padding - btn_height
+    btn_y = _safe_bottom_button_y(state, btn_height, btn_padding)
     back_rect = pygame.Rect(btn_x, btn_y, btn_width, btn_height)
     pygame.draw.rect(state.screen, BUTTON_BG, back_rect, border_radius=6)
     pygame.draw.rect(state.screen, (160, 160, 160), back_rect, 2, border_radius=6)

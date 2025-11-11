@@ -15,7 +15,9 @@ class SmartLockMinigame:
         self.message_color = TEXT_COLOR
         self.won = False
         self.victory_dialog_shown = False  # Track if victory dialog has been shown
-        
+        # Ensure we only send the Arduino 'G' command once on victory
+        self._arduino_sent = False
+
         # Button layout
         self.buttons = []
         self.check_button = None
@@ -111,6 +113,7 @@ class SmartLockMinigame:
         self.message_color = (255, 255, 255)  # White color
         self.won = False
         self.victory_dialog_shown = False
+        self._arduino_sent = False
     
     def stop(self):
         """Stop the minigame"""
@@ -293,7 +296,14 @@ class SmartLockMinigame:
         
         # If won, show victory message
         if self.won:
-            arduino_handler.send_command_to_arduino("G")
+            # Send Arduino command only once to avoid duplicate signals
+            if not getattr(self, '_arduino_sent', False):
+                try:
+                    arduino_handler.send_command_to_arduino("G")
+                except Exception:
+                    # If sending fails, don't crash the game loop
+                    pass
+                self._arduino_sent = True
             # Position messages within the keypad panel
             victory_y = panel_y + panel_height - 90
             victory_text = self.title_font.render("DOOR UNLOCKED", True, (67, 160, 71))

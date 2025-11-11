@@ -107,12 +107,32 @@ def draw_dialog(state):
     box_h = 220
     box_w = sw - 120
     box_x = 60
+    # Default box Y placement (above bottom margin)
     box_y = sh - box_h - 40
 
-    # Dim overlay to focus attention on dialog
+    # Ensure the dialog box does not overlap the bottom timeline.
+    # Timeline sizing used across the UI: margin=24, timeline_h=84
+    margin = 24
+    timeline_h = 84
+    timeline_top = sh - margin - timeline_h
+    # If needed, move the box up so its bottom stays above the timeline
+    if box_y + box_h > timeline_top:
+        box_y = max(16, timeline_top - box_h - 8)
+
+    # Dim overlay to focus attention on dialog. Draw it full-screen but
+    # keep the timeline visible by redrawing it above the overlay.
     overlay = pygame.Surface((sw, sh), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, 120))
     screen.blit(overlay, (0, 0))
+
+    # Try to redraw the timeline above the overlay so it stays bright.
+    try:
+        # Import locally to avoid top-level circular imports
+        from ui import browser as _browser
+        _browser.draw_progress_timeline(state)
+    except Exception:
+        # If that fails, ignore — overlay will cover timeline in that case
+        pass
 
     # Background
     rect = pygame.Rect(box_x, box_y, box_w, box_h)

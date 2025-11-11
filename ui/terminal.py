@@ -32,9 +32,18 @@ def draw_terminal(state):
                      (state.terminal_rect.right, state.HEIGHT), 2)
     
     # Output lines (from the system) — render in orange
-    y = 10
+    # Start drawing at top of terminal rect with small padding
+    y = state.terminal_rect.y + 10
     line_h = state.mono_font.get_linesize()
-    max_lines = max(1, (state.terminal_rect.height - 40) // line_h)
+    # Ensure terminal text never overlaps the bottom timeline.
+    # Match timeline sizing used in browser: margin=24, timeline_h=84
+    margin = 24
+    timeline_h = 84
+    timeline_top = state.HEIGHT - margin - timeline_h
+    # If terminal extends into timeline area, reduce available height
+    overlap = max(0, state.terminal_rect.bottom - timeline_top)
+    available_h = max(0, state.terminal_rect.height - overlap - 20)
+    max_lines = max(1, available_h // line_h)
 
     for line in state.output_lines[-max_lines:]:
         # If this line is a user-entered command it is stored as '/root> <cmd>'
@@ -83,7 +92,8 @@ def draw_terminal(state):
     _load_clippy()
     if _clippy_image:
         clippy_x = state.terminal_rect.right - _clippy_image.get_width() - 10
-        clippy_y = clippy_x + 70
+        # Place Clippy near the top-right of the terminal pane
+        clippy_y = state.terminal_rect.y + 10
         _clippy_rect = pygame.Rect(clippy_x, clippy_y, _clippy_image.get_width(), _clippy_image.get_height())
         
         # Check if mouse is hovering over Clippy

@@ -25,6 +25,13 @@ def on_exploit_attempt(state, exploit: str):
         wait(state, 3)
         state.output_lines.append("[!]The RouteSimple router login has been bypassed!")
         state.current_page["bypassed"] = True
+        # Count this hacked device once
+        try:
+            if not state.current_page.get("_counted", False):
+                state.number_of_hacked_devices = getattr(state, "number_of_hacked_devices", 0) + 1
+                state.current_page["_counted"] = True
+        except Exception:
+            pass
         wait(state, 1)
         state.current_page["bypass_time"] = pygame.time.get_ticks()
         # Advance progression to indicate router is hacked

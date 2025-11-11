@@ -34,3 +34,17 @@ def on_bruteforce_success(state, exploit_name: str):
         state.current_stage_index = max(state.current_stage_index, 1)
     except Exception:
         pass
+    # Count this hacked device once
+    try:
+        if not state.browser_pages[state.current_page_index].get("_counted", False):
+            state.number_of_hacked_devices = getattr(state, "number_of_hacked_devices", 0) + 1
+            state.browser_pages[state.current_page_index]["_counted"] = True
+    except Exception:
+        # Fallback: try marking the camera_login page specifically
+        try:
+            cam = next((p for p in state.browser_pages if p.get("id") == "camera_login"), None)
+            if cam and not cam.get("_counted", False):
+                state.number_of_hacked_devices = getattr(state, "number_of_hacked_devices", 0) + 1
+                cam["_counted"] = True
+        except Exception:
+            pass

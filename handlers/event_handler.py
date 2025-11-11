@@ -199,6 +199,14 @@ def handle_mouse(state, event):
                             send_command_to_arduino("E") # since we don't hack it, send E to indicate "hacked"
                             # Update progression when accessing fridge
                             state.current_stage_index = max(state.current_stage_index, 3)
+                            # Count first-time access to fridge as a hacked device (only once)
+                            try:
+                                fridge_page = next((p for p in state.browser_pages if p.get("id") == "smart_fridge"), None)
+                                if fridge_page and not fridge_page.get("_counted", False):
+                                    state.number_of_hacked_devices = getattr(state, "number_of_hacked_devices", 0) + 1
+                                    fridge_page["_counted"] = True
+                            except Exception:
+                                pass
                             dialog_handler.start_dialog(state, [
                                     f"We're on the Smart Fridge page.",
                                     "There isn't anything very interesting for us here.",

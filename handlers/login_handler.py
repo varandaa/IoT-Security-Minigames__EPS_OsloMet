@@ -26,6 +26,13 @@ def login_attempt(state):
                 "Most importantly, we know they aren't usually home from 9 to 18. That's the best time to break in!"
             ], char_delay=20)
             state.current_stage_index = max(state.current_stage_index, 2)
+            # Count this hacked device once
+            try:
+                if not page.get("_counted", False):
+                    state.number_of_hacked_devices = getattr(state, "number_of_hacked_devices", 0) + 1
+                    page["_counted"] = True
+            except Exception:
+                pass
             return True
         else:
             page["login_failed"] = True
@@ -45,6 +52,13 @@ def login_attempt(state):
             ], char_delay=20)
             # promote progression a bit (arbitrary stage)
             state.current_stage_index = max(state.current_stage_index, 4)
+            # Count this hacked device once
+            try:
+                if not page.get("_counted", False):
+                    state.number_of_hacked_devices = getattr(state, "number_of_hacked_devices", 0) + 1
+                    page["_counted"] = True
+            except Exception:
+                pass
             return True
         else:
             page["login_failed"] = True

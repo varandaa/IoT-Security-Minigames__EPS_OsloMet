@@ -213,6 +213,7 @@ class GameState:
         # Progression: which stage the player has reached (index into config.STAGE_ORDER)
         # Start at -1 (nothing hacked). When they bypass router, set to 0.
         self.current_stage_index = -1
+        self.number_of_hacked_devices = 0
         
         # Fonts
         self.mono_font = None
