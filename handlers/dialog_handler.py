@@ -156,10 +156,17 @@ def draw_dialog(state):
     full_line = dlg["lines"][idx]
     visible_text = full_line[: dlg["char_index"]]
 
+    # Use a slightly larger font for dialog text to improve readability
+    try:
+        dialog_font_size = max(16, int(state.ui_font.get_height() * 1.3))
+        dialog_font = pygame.font.Font(pygame.font.match_font('dejavusans'), dialog_font_size)
+    except Exception:
+        dialog_font = state.ui_font
+
     # Draw name area (optional) - we don't have speaker name in this simple implementation
 
-    # Render wrapped visible text
-    _render_wrapped_text(screen, visible_text, state.ui_font, (230, 230, 230), text_x, box_y + 20, text_w, line_spacing=6)
+    # Render wrapped visible text using the larger dialog font
+    _render_wrapped_text(screen, visible_text, dialog_font, (230, 230, 230), text_x, box_y + 20, text_w, line_spacing=6)
 
 
 def handle_key(state, event):
